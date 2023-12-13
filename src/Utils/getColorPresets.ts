@@ -67,13 +67,16 @@ export const bluePreset = colorPresets[3];
 export const orangePreset = colorPresets[4];
 export const redPreset = colorPresets[5];
 
-export default function getColorPresets(presetsKey) {
-  return {
+const getColorPresets = (presetsKey: any) => {
+  const presets: Record<any, any> = {
     purple: purplePreset,
     cyan: cyanPreset,
     blue: bluePreset,
     orange: orangePreset,
     red: redPreset,
     default: defaultPreset,
-  }[presetsKey];
-}
+  };
+  return presets[presetsKey];
+};
+
+export default getColorPresets;
