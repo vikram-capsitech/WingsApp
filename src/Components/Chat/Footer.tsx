@@ -20,7 +20,7 @@ import {
 import { useTheme, styled } from "@mui/material/styles";
 import React from "react";
 import { useSearchParams } from "react-router-dom";
-import useResponsive from "../../hooks/useResponsive";
+import useResponsive from "../../Hooks/useResponsive";
 
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";

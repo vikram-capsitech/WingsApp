@@ -4,8 +4,8 @@ import { Navigate, useRoutes } from "react-router-dom";
 import DashboardLayout from "../layouts/Dashboard";
 
 // config
-import { DEFAULT_PATH } from "../config";
-import LoadingScreen from "../components/LoadingScreen";
+import { DEFAULT_PATH } from "../Config";
+import LoadingScreen from "../Components/LoadingScreen";
 import AuthLayout from "../layouts/auth";
 
 const Loadable = (Component: any) => (props: any) => {
@@ -50,19 +50,19 @@ export default function Router() {
 }
 
 const GeneralApp = Loadable(
-  lazy(() => import("../pages/dashboard/GeneralApp"))
+  lazy(() => import("../pages/Dashboard/GeneralApp"))
 );
 const Conversation = Loadable(
-  lazy(() => import("../pages/dashboard/Conversation"))
+  lazy(() => import("../pages/Dashboard/Conversation"))
 );
-const Chats = Loadable(lazy(() => import("../pages/dashboard/Chats")));
-const Contact = Loadable(lazy(() => import("../sections/dashboard/Contact")));
+const Chats = Loadable(lazy(() => import("../pages/Dashboard/Chats")));
+const Contact = Loadable(lazy(() => import("../sections/Dashboard/Contact")));
 const Page404 = Loadable(lazy(() => import("../pages/Page404")));
 
-const LoginPage = Loadable(lazy(() => import("../pages/auth/Login")));
+const LoginPage = Loadable(lazy(() => import("../pages/Auth/Login")));
 
 // // Settings
-const Settings = Loadable(lazy(() => import("../pages/dashboard/Settings")));
+const Settings = Loadable(lazy(() => import("../pages/Dashboard/Settings")));
 const Profile = Loadable(
   lazy(() => import("../pages/dashboard/Settings/Profile"))
 );

@@ -5,7 +5,7 @@ import { Box, Stack, Typography } from "@mui/material";
 import { Link, useSearchParams } from "react-router-dom";
 // import ChatComponent from "./Conversation";
 import Chats from "./Chats";
-import Contact from "../../sections/dashboard/Contact";
+import Contact from "../../Sections/dashboard/Contact";
 import NoChat from "../../Assets/Illiustration/NoChat";
 import { useSelector } from "react-redux";
 

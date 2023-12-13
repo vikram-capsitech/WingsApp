@@ -22,7 +22,7 @@ import {
 
 import { useTheme } from "@mui/material/styles";
 import ThemeDialog from "../../../Sections/dashboard/Settings/ThemeDialog";
-import ShortcutDialog from "../../../sections/dashboard/Settings/ShortcutDialog";
+import ShortcutDialog from "../../../Sections/dashboard/Settings/ShortcutDialog";
 
 const Settings = () => {
   const theme = useTheme();

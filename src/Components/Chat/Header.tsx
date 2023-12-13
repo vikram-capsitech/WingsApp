@@ -15,7 +15,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { CaretDown, MagnifyingGlass, Phone, VideoCamera } from "phosphor-react";
 import { useSearchParams } from "react-router-dom";
-import useResponsive from "../../hooks/useResponsive";
+import useResponsive from "../../Hooks/useResponsive";
 import { useSelector } from "react-redux";
 
 const StyledBadge = styled(Badge)(({ theme }: any) => ({

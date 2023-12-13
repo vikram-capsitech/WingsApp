@@ -1,10 +1,10 @@
 import { Stack, Box } from "@mui/material";
 import React, { useEffect, useRef } from "react";
 import { useTheme } from "@mui/material/styles";
-import { SimpleBarStyle } from "../../components/Scrollbar";
+import { SimpleBarStyle } from "../../Components/ScrollBar";
 
-import { ChatHeader, ChatFooter } from "../../components/Chat";
-import useResponsive from "../../hooks/useResponsive";
+import { ChatHeader, ChatFooter } from "../../Components/Chat";
+import useResponsive from "../../Hooks/useResponsive";
 import {
   DocMsg,
   LinkMsg,
@@ -12,7 +12,7 @@ import {
   ReplyMsg,
   TextMsg,
   Timeline,
-} from "../../sections/Dashboard/Conversation";
+} from "../../Sections/dashboard/Conversation";
 import { useDispatch, useSelector } from "react-redux";
 import {
   SetChats,

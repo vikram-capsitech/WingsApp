@@ -1,7 +1,7 @@
 // routes
 import { Snackbar } from "@mui/material";
 import ThemeSettings from "./Components/Settings";
-import Router from "./routes";
+import Router from "./Routes/Index";
 import MuiAlert from "@mui/material/Alert";
 // theme
 import ThemeProvider from "./Theme";

@@ -1,7 +1,7 @@
 import React from "react";
 import { Avatar, Box, Fade, Menu, MenuItem, Stack } from "@mui/material";
 
-import { Profile_Menu } from "../../data";
+import { Profile_Menu } from "../../Data";
 import { useDispatch, useSelector } from "react-redux";
 import { AuthInitialState, LogoutUser } from "../../redux/slices/auth";
 import { useNavigate } from "react-router-dom";
@@ -56,7 +56,7 @@ const ProfileMenu = () => {
       >
         <Box p={1}>
           <Stack spacing={1}>
-            {Profile_Menu.map((el, idx) => (
+            {Profile_Menu.map((el:any, idx:any) => (
               <MenuItem onClick={handleClose}>
                 <Stack
                   onClick={() => {

@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useTheme, alpha } from "@mui/material/styles";
 import { DotsThreeVertical, DownloadSimple, Image } from "phosphor-react";
-import { Message_options } from "../../data";
+import { Message_options } from "../../Data";
 import Embed from "react-embed";
 import moment from "moment";
 import { useSelector } from "react-redux";
@@ -46,7 +46,7 @@ const MessageOption = () => {
         }}
       >
         <Stack spacing={0.5} px={0}>
-          {Message_options.map((el) => (
+          {Message_options.map((el:any) => (
             <MenuItem onClick={handleClose} style={{ fontSize: 12 }}>
               {el.title}
             </MenuItem>

@@ -1,7 +1,7 @@
 // sections
 import { Stack, Typography } from "@mui/material";
-import AuthSocial from "../../sections/auth/AuthSocial";
-import Login from "../../sections/auth/LoginForm";
+import AuthSocial from "../../Sections/Auth/AuthSocial";
+import Login from "../../Sections/Auth/LoginForm";
 
 // ----------------------------------------------------------------------
 

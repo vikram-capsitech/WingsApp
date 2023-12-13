@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 //
-import SettingsDrawer from './drawer';
+import SettingsDrawer from './Drawer';
 //
 import ThemeContrast from './ThemeContrast';
 import ThemeRtlLayout from './ThemeRtlLayout';

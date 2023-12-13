@@ -10,14 +10,14 @@ import {
   IconButton,
 } from "@mui/material";
 // hooks
-import useSettings from "../../../hooks/useSettings";
+import useSettings from "../../../Hooks/useSettings";
 // utils
 import cssStyles from "../../../Utils/cssStyles";
 // config
-import { NAVBAR, defaultSettings } from "../../../config";
+import { NAVBAR, defaultSettings } from "../../../Config";
 //
 import Iconify from "../../Iconify";
-import Scrollbar from "../../Scrollbar";
+import Scrollbar from "../../ScrollBar";
 //
 import ToggleButton from "./ToggleButton";
 import SettingDirection from "./SettingDirection";

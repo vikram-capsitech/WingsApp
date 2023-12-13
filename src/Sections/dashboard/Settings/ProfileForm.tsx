@@ -4,8 +4,8 @@ import { Formik, FormikHelpers, FormikValues } from "formik";
 // form
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import FormProvider from "../../../components/hook-form/FormProvider";
-import { RHFTextField, RHFUploadAvatar } from "../../../components/hook-form";
+import FormProvider from "../../../Components/Hook-Form/FormProvider";
+import { RHFTextField, RHFUploadAvatar } from "../../../Components/Hook-Form";
 import { Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { useDispatch, useSelector } from "react-redux";

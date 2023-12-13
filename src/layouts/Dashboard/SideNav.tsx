@@ -2,12 +2,12 @@ import React from "react";
 import { useTheme } from "@mui/material/styles";
 
 import { Box, IconButton, Stack } from "@mui/material";
-import AntSwitch from "../../components/AntSwitch";
+import AntSwitch from "../../Components/AntSwitch";
 
 import Logo from "../../Assets/Images/wings.svg";
 
-import useSettings from "../../hooks/useSettings";
-import { Nav_Buttons } from "../../data";
+import useSettings from "../../Hooks/useSettings";
+import { Nav_Buttons } from "../../Data";
 
 import ProfileMenu from "./ProfileMenu";
 import { useNavigate } from "react-router-dom";
@@ -84,7 +84,7 @@ const SideBar = () => {
             alignItems={"center"}
             spacing={3}
           >
-            {Nav_Buttons.map((el) => {
+            {Nav_Buttons.map((el:any) => {
               return el.index == selectedTab ? (
                 <Box
                   sx={{

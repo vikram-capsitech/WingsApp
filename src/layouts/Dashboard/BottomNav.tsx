@@ -2,7 +2,7 @@ import React from "react";
 import { useTheme } from "@mui/material/styles";
 import { Box, IconButton, Stack } from "@mui/material";
 import ProfileMenu from "./ProfileMenu";
-import { Nav_Buttons } from "../../data";
+import { Nav_Buttons } from "../../Data";
 
 const BottomNav = () => {
   const theme = useTheme();
@@ -33,7 +33,7 @@ const BottomNav = () => {
         spacing={2}
         p={2}
       >
-        {Nav_Buttons.map((el) => {
+        {Nav_Buttons.map((el:any) => {
           return el.index === selectedTab ? (
             <Box sx={{ backgroundColor: theme.palette.primary.main, borderRadius: 1.5 }} p={1}>
               <IconButton sx={{ width: "max-content", color: "#ffffff" }}>

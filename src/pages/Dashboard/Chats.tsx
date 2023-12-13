@@ -9,9 +9,9 @@ import {
   CircleDashed,
 } from "phosphor-react";
 import { useTheme } from "@mui/material/styles";
-import useResponsive from "../../hooks/useResponsive";
-import BottomNav from "../../layouts/dashboard/BottomNav";
-import ChatElement from "../../components/ChatElement";
+import useResponsive from "../../Hooks/useResponsive";
+import BottomNav from "../../layouts/Dashboard/BottomNav";
+import ChatElement from "../../Components/ChatElement";
 import { useDispatch, useSelector } from "react-redux";
 import { requestHandler } from "../../Utils";
 import { createUserChat, getUserChats } from "../../Api";
