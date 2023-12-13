@@ -1,5 +1,5 @@
 // theme
-import palette from "../theme/palette";
+import palette from "../Theme/Palette";
 
 export const colorPresets = [
   // DEFAULT

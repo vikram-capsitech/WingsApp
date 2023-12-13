@@ -1,12 +1,12 @@
 import { Suspense, lazy } from "react";
 import { Navigate, useRoutes } from "react-router-dom";
 // layouts
-import DashboardLayout from "../layouts/Dashboard";
+import DashboardLayout from "../layouts/Dashboard/Index";
 
 // config
 import { DEFAULT_PATH } from "../Config";
 import LoadingScreen from "../Components/LoadingScreen";
-import AuthLayout from "../layouts/auth";
+import AuthLayout from "../layouts/auth/index";
 
 const Loadable = (Component: any) => (props: any) => {
   return (
@@ -56,7 +56,7 @@ const Conversation = Loadable(
   lazy(() => import("../pages/Dashboard/Conversation"))
 );
 const Chats = Loadable(lazy(() => import("../pages/Dashboard/Chats")));
-const Contact = Loadable(lazy(() => import("../sections/Dashboard/Contact")));
+const Contact = Loadable(lazy(() => import("../Sections/dashboard/Contact")));
 const Page404 = Loadable(lazy(() => import("../pages/Page404")));
 
 const LoginPage = Loadable(lazy(() => import("../pages/Auth/Login")));
@@ -64,5 +64,5 @@ const LoginPage = Loadable(lazy(() => import("../pages/Auth/Login")));
 // // Settings
 const Settings = Loadable(lazy(() => import("../pages/Dashboard/Settings")));
 const Profile = Loadable(
-  lazy(() => import("../pages/dashboard/Settings/Profile"))
+  lazy(() => import("../pages/Dashboard/Settings/Profile"))
 );
