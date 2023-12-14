@@ -30,6 +30,7 @@ import {
 } from "../../Interfaces/chat";
 import wings from "../../Assets/Images/wings.svg";
 import addNotification from "react-push-notification";
+import _ from "lodash";
 
 const CONNECTED_EVENT = "connected";
 const DISCONNECT_EVENT = "disconnect";
@@ -44,7 +45,7 @@ const UPDATE_GROUP_NAME_EVENT = "updateGroupName";
 const Conversation = ({ isMobile, menu }: any) => {
   const scrollRef = React.useRef<any>();
   const { messages } = useSelector((state: any) => state.chat);
-  
+
   React.useEffect(() => {
     if (scrollRef)
       (scrollRef.current as HTMLElement).scrollIntoView({ behavior: "smooth" });
@@ -135,9 +136,9 @@ const ChatComponent = () => {
     message: ChatMessageInterface // The new message to be set as the last message
   ) => {
     // Search for the chat with the given ID in the chats array
-    const chatToUpdate = chats.find(
+    const chatToUpdate = _.cloneDeep(chats.find(
       (chat: { _id: string }) => chat._id === chatToUpdateId
-    )!;
+    )!);
 
     // Update the 'lastMessage' field of the found chat with the new message
     chatToUpdate.lastMessage = message;
