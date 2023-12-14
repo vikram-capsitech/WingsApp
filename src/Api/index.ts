@@ -17,6 +17,8 @@ apiClient.interceptors.request.use(
     // console.log(state)
     const redux = LocalStorage.get("redux-root");
     const auth = JSON.parse(redux.auth)
+    console.log("redux",redux)
+    console.log("auth",auth)
     // Set authorization header with bearer token
     config.headers.Authorization = `Bearer ${auth.token}`;
     return config;
