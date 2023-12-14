@@ -42,9 +42,9 @@ const LEAVE_CHAT_EVENT = "leaveChat";
 const UPDATE_GROUP_NAME_EVENT = "updateGroupName";
 
 const Conversation = ({ isMobile, menu }: any) => {
-  const { messages } = useSelector((state: any) => state.chat);
   const scrollRef = React.useRef<any>();
-
+  const { messages } = useSelector((state: any) => state.chat);
+  
   React.useEffect(() => {
     if (scrollRef)
       (scrollRef.current as HTMLElement).scrollIntoView({ behavior: "smooth" });
@@ -282,7 +282,6 @@ const ChatComponent = () => {
    * Handles the event when a new message is received.
    */
   const onMessageReceived = (message: ChatMessageInterface) => {
-
     //send notification of new chat message
     addNotification({
       title: "New Message from Wings",
@@ -291,7 +290,7 @@ const ChatComponent = () => {
       duration: 4000,
       icon: wings,
       vibrate: 200,
-      backgroundTop:theme.palette.primary.main,
+      backgroundTop: theme.palette.primary.main,
       native: true, // when using native, your OS will handle theming.
       onClick: () => {
         window.focus();

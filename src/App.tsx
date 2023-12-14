@@ -8,7 +8,6 @@ import ThemeProvider from "./Theme";
 import { useDispatch, useSelector } from "react-redux";
 import React from "react";
 import { closeSnackBar } from "./redux/slices/app";
-import { SocketProvider } from "./Contexts/SocketContext";
 // components
 
 const vertical = "bottom";
@@ -27,10 +26,7 @@ function App() {
     <>
       <ThemeProvider>
         <ThemeSettings>
-          <SocketProvider>
-            {" "}
-            <Router />{" "}
-          </SocketProvider>
+          {/* <SocketProvider> */} <Router /> {/* </SocketProvider> */}
         </ThemeSettings>
       </ThemeProvider>
       {message && open ? (
