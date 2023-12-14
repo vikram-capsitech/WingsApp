@@ -10,13 +10,20 @@ import {
   RadioGroup,
   FormControl,
   FormControlLabel,
+  Stack,
+  Typography,
+  Divider,
 } from "@mui/material";
+import SettingColorPresets from "../../../Components/Settings/Drawer/SettingColorPresets";
+import SettingFullscreen from "../../../Components/Settings/Drawer/SettingFullscreen";
+import useSettings from "../../../Hooks/useSettings";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props as any} />;
+  return <Slide direction="up" ref={ref} {...(props as any)} />;
 });
 
-const ThemeDialog = ({ open, handleClose }:any) => {
+const ThemeDialog = ({ open, handleClose }: any) => {
+  const { onResetSetting } = useSettings();
   return (
     <>
       <Dialog
@@ -48,8 +55,17 @@ const ThemeDialog = ({ open, handleClose }:any) => {
               />
             </RadioGroup>
           </FormControl>
+          <Divider sx={{ borderStyle: "dashed" }} />
+          <Stack spacing={3} sx={{ p: 3 }}>
+            <Stack spacing={1.5}>
+              <Typography variant="subtitle2">Presets</Typography>
+              <SettingColorPresets />
+            </Stack>
+            <SettingFullscreen />
+          </Stack>
         </DialogContent>
         <DialogActions>
+          <Button onClick={onResetSetting}>Reset</Button>
           <Button onClick={handleClose}>Cancel</Button>
           <Button variant="contained" onClick={handleClose}>
             Apply

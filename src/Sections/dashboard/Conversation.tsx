@@ -97,21 +97,22 @@ const TextMsg = ({ el, menu }: any) => {
         />
         <Box
           sx={{
-            backgroundColor: el.incoming
+            backgroundColor: el.sender?._id !== user?._id
               ? alpha(theme.palette.background.default, 1)
               : theme.palette.primary.main,
             borderRadius: 1.1,
             width: "max-content",
             display: "flex",
-            flexDirection: el.sender?._id !== user?._id ? "row" : "row-reverse",
+            flexDirection: "row-reverse",
             padding: el.sender?._id !== user?._id ? "3px 0px" : "3px 15px",
-            paddingRight: el.sender?._id !== user?._id ? 2 : 0,
+            paddingRight: el.sender?._id !== user?._id ? 0 : 0,
+            paddingLeft:el.sender?._id !== user?._id ? 1 : 2
           }}
         >
           {menu && <MessageOption />}
           <Typography
             variant="body1"
-            color={`${el.incoming ? theme.palette.text : "#fff"}`}
+            color={`${el.sender?._id !== user?._id ? theme.palette.text : "#fff"}`}
           >
             {el.content}
           </Typography>

@@ -25,6 +25,9 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
     backgroundColor: "#44b700",
     color: "#44b700",
     boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    zIndex:0,
+    top:18,
+    right:5,
     "&::after": {
       position: "absolute",
       top: 0,
@@ -68,13 +71,8 @@ const ChatElement = (chat: ChatListItemInterface) => {
   return (
     <StyledChatBox
       onClick={() => {
-        if (
-          currentChat?._id &&
-          currentChat?._id === chat?._id
-        )
-          return;
         dispatch(setCurrentChat(chat) as any);
-        navigate(`/conversation/${chat?._id}`)
+        navigate(`/app/${chat?._id}`)
       }}
       sx={{
         width: "100%",
@@ -98,14 +96,13 @@ const ChatElement = (chat: ChatListItemInterface) => {
           {" "}
           {chat._id === currentChat?._id ? (
             <StyledBadge
-              overlap="circular"
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
             >
               <Avatar
                 alt={getChatObjectMetadata(chat, user!).title}
                 src={getChatObjectMetadata(chat, user!).avatar ?? ""}
-                sx={{ width: 24, height: 24 }}
+                sx={{ width: 30, height: 30 }}
               />
             </StyledBadge>
           ) : (

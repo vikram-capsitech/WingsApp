@@ -10,7 +10,7 @@ RHFAutocomplete.propTypes = {
   name: PropTypes.string,
   label: PropTypes.string,
   helperText: PropTypes.node,
-};
+} as any;
 
 export default function RHFAutocomplete({ name, label, helperText, ...other }:any) {
   const { control, setValue } = useFormContext();

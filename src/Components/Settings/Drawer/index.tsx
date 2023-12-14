@@ -20,13 +20,12 @@ import Iconify from "../../Iconify";
 import Scrollbar from "../../ScrollBar";
 //
 import ToggleButton from "./ToggleButton";
-import SettingDirection from "./SettingDirection";
 import SettingFullscreen from "./SettingFullscreen";
 import SettingColorPresets from "./SettingColorPresets";
 
 // ----------------------------------------------------------------------
 
-const RootStyle = styled(m.div)(({ theme }:any) => ({
+export const RootStyle = styled(m.div)(({ theme }: any) => ({
   ...cssStyles(theme).bgBlur({
     color: theme.palette.background.paper,
     opacity: 0.92,
@@ -136,11 +135,6 @@ export default function SettingsDrawer() {
 
               <Scrollbar sx={{ flexGrow: 1 }}>
                 <Stack spacing={3} sx={{ p: 3 }}>
-                  <Stack spacing={1.5}>
-                    <Typography variant="subtitle2">Direction</Typography>
-                    <SettingDirection />
-                  </Stack>
-
                   <Stack spacing={1.5}>
                     <Typography variant="subtitle2">Presets</Typography>
                     <SettingColorPresets />

@@ -1,13 +1,6 @@
 import React from "react";
-import {
-  Box,
-  IconButton,
-  Stack,
-  Typography,
-} from "@mui/material";
-import {
-  CircleDashed,
-} from "phosphor-react";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { CircleDashed } from "phosphor-react";
 import { useTheme } from "@mui/material/styles";
 import useResponsive from "../../Hooks/useResponsive";
 import BottomNav from "../../layouts/Dashboard/BottomNav";
@@ -18,10 +11,12 @@ import { createUserChat, getUserChats } from "../../Api";
 import { ChatListItemInterface } from "../../Interfaces/chat";
 import { FetchChats, SetChats, setCurrentChat } from "../../redux/slices/chat";
 import { SearchUserInput } from "../../Components/SearchAsync";
+import { useNavigate } from "react-router-dom";
 
 const Chats = () => {
   const theme = useTheme();
   const isDesktop = useResponsive("up", "md");
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
 
@@ -102,6 +97,7 @@ const Chats = () => {
                       if (res.statusCode === 200) {
                         // setSelectedChat(data);
                         dispatch(setCurrentChat(data) as any);
+                        navigate(`/app/${data?._id}`);
                         return;
                       }
                       getChats(newValue.value);
@@ -123,7 +119,7 @@ const Chats = () => {
                 All Chats
               </Typography>
               {/* Chat List */}
-              {chats.map((el: ChatListItemInterface) => {
+              {chats?.map((el: ChatListItemInterface) => {
                 return <ChatElement {...el} />;
               })}
             </Stack>

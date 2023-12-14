@@ -2,7 +2,6 @@ import {
   ChatCircleDots,
   Gear,
   GearSix,
-  Phone,
   SignOut,
   User,
   Users,
@@ -53,10 +52,10 @@ const Nav_Buttons = [
     index: 1,
     icon: <Users />,
   },
-  {
-    index: 2,
-    icon: <Phone />,
-  },
+  // {
+  //   index: 2,
+  //   icon: <Phone />,
+  // },
 ];
 
 const Nav_Setting = [

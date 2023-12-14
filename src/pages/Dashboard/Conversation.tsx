@@ -28,6 +28,8 @@ import {
   ChatListItemInterface,
   ChatMessageInterface,
 } from "../../Interfaces/chat";
+import wings from "../../Assets/Images/wings.svg";
+import addNotification from "react-push-notification";
 
 const CONNECTED_EVENT = "connected";
 const DISCONNECT_EVENT = "disconnect";
@@ -49,8 +51,8 @@ const Conversation = ({ isMobile, menu }: any) => {
   }, [scrollRef, messages]);
 
   return (
-    <Box p={isMobile ? 1 : 3}>
-      <Stack spacing={2} style={{ maxHeight: "70dvh" }}>
+    <Box p={isMobile ? 1 : 2}>
+      <Stack spacing={2} style={{ height: "73.4dvh" }}>
         {messages.toReversed().map((el: any) => {
           switch (el.type) {
             case "divider":
@@ -118,6 +120,7 @@ const ChatComponent = () => {
   );
   const [isTyping, setIsTyping] = React.useState(false); // To track if someone is currently typing
   const [selfTyping, setSelfTyping] = React.useState(false); // To track if the current user is typing
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isConnected, setIsConnected] = React.useState(false); // For tracking socket connection
   // To keep track of the setTimeout function
   const typingTimeoutRef = useRef<any | null>(null);
@@ -279,6 +282,21 @@ const ChatComponent = () => {
    * Handles the event when a new message is received.
    */
   const onMessageReceived = (message: ChatMessageInterface) => {
+
+    //send notification of new chat message
+    addNotification({
+      title: "New Message from Wings",
+      subtitle: `${message.sender?.username}`,
+      message: `${message.content}`,
+      duration: 4000,
+      icon: wings,
+      vibrate: 200,
+      backgroundTop:theme.palette.primary.main,
+      native: true, // when using native, your OS will handle theming.
+      onClick: () => {
+        window.focus();
+      },
+    });
     // Check if the received message belongs to the currently active chat
     if (message?.chat !== currentChat?._id) {
       // If not, update the list of unread messages
@@ -404,6 +422,7 @@ const ChatComponent = () => {
       <ChatHeader />
       <Box
         width={"100%"}
+        height={"100vh"}
         sx={
           {
             position: "relative",
