@@ -2,6 +2,7 @@
 import axios from "axios";
 import { LocalStorage } from "../Utils";
 
+
 // Create an Axios instance for API requests
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_SERVER_URI,
@@ -13,9 +14,11 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   function (config) {
     // Retrieve user token from local storage
-    const token = LocalStorage.get("token");
+    // console.log(state)
+    const redux = LocalStorage.get("redux-root");
+    const auth = JSON.parse(redux.auth)
     // Set authorization header with bearer token
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${auth.token}`;
     return config;
   },
   function (error) {
