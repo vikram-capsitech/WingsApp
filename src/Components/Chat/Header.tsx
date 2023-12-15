@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { CaretDown, MagnifyingGlass, Phone, VideoCamera } from "phosphor-react";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import useResponsive from "../../Hooks/useResponsive";
 import { useSelector } from "react-redux";
 
@@ -68,7 +68,7 @@ const ChatHeader = () => {
   const theme = useTheme();
   const { currentChat } = useSelector((state: any) => state.chat);
   const { user } = useSelector((state: any) => state.auth);
-
+  const { clientId } = useParams();
   const [conversationMenuAnchorEl, setConversationMenuAnchorEl] =
     React.useState(null);
   const openConversationMenu = Boolean(conversationMenuAnchorEl);
@@ -88,7 +88,7 @@ const ChatHeader = () => {
   React.useEffect(() => {
     const getUserDetail = () => {
       if (currentChat) {
-        const rece = currentChat.participants.filter((u: any) => {
+        const rece = currentChat.users.filter((u: any) => {
           if (u._id !== user?._id) return u;
         });
         setReceiver(() => ({
@@ -101,7 +101,7 @@ const ChatHeader = () => {
     };
     getUserDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [clientId]);
 
   return (
     <Box
@@ -145,7 +145,15 @@ const ChatHeader = () => {
           </Box>
           <Stack spacing={0.1}>
             <Typography variant="subtitle2">{receiver.name}</Typography>
-            <Typography variant="caption" style={{fontWeight:500}}>{receiver.email}</Typography>
+            {currentChat?.isTyping ? (
+              <label style={{ color: "green", fontWeight: 600, fontSize: 12 }}>
+                ...Typing
+              </label>
+            ) : (
+              <Typography variant="caption" style={{ fontWeight: 500 }}>
+                {receiver.email}
+              </Typography>
+            )}
           </Stack>
         </Stack>
         <Stack direction={"row"} alignItems="center" spacing={1}>

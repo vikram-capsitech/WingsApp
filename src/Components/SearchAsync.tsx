@@ -1,7 +1,9 @@
-import { getAvailableUsers } from "../Api";
-import { requestHandler } from "../Utils";
 import AsyncSelect from "react-select/async";
 import { debounce } from "lodash";
+import AxiosService from "../Api/Service";
+import { useSelector } from "react-redux";
+import { showSnackbar } from "../redux/slices/app";
+import { dispatch } from "../redux/store";
 
 export const SearchUserInput = ({
   onChange,
@@ -10,15 +12,12 @@ export const SearchUserInput = ({
   isMulti = false,
   border = "none",
 }: any) => {
+  const { user } = useSelector((state: any) => state.auth);
   const _loadSuggestions = (query: string, callback: any) => {
-    requestHandler(
-      // Callback to fetch available users
-      async () => await getAvailableUsers(query),
-      null, // No loading setter callback provided
-      // Success callback
-      (res) => {
-        if (res.data) {
-          const opt = res.data.map((r: any) => {
+    AxiosService.get(`/api/user?search=${query}`, user.token)
+      .then((res: any) => {
+        if (res.result) {
+          const opt = res.result.map((r: any) => {
             return {
               label: r.username,
               value: r._id,
@@ -26,13 +25,15 @@ export const SearchUserInput = ({
               pic: r.pic,
             };
           });
-          callback(opt); // Set users data or an empty array if data is absent
+          callback(opt);
         } else {
-          callback([]); // Set users data or an empty array if data is absent
+          callback([]);
         }
-      },
-      alert // Use the alert as the error handler
-    );
+      })
+      .catch((error: any) => {
+        callback([]);
+        dispatch(showSnackbar({ severity: "error", message: error.message }));
+      });
   };
 
   const loadSuggestions = debounce(_loadSuggestions, 300);

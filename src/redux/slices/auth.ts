@@ -1,9 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 import { showSnackbar } from "./app";
-import { requestHandler } from "../../Utils";
-import { loginUser } from "../../Api";
 import { UserInterface } from "../../Interfaces/user";
+import AxiosService from "../../Api/Service";
 
 // ----------------------------------------------------------------------
 
@@ -50,38 +49,29 @@ export default slice.reducer;
 
 export function LoginUser(formValues: any) {
   return async (dispatch: any) => {
+    dispatch(slice.actions.updateIsLoading({ isLoading: true, error: false }));
     // Make API call here
-    await requestHandler(
-      async () => await loginUser(formValues),
-      () => {
-        dispatch(
-          slice.actions.updateIsLoading({ isLoading: true, error: false })
-        );
-      },
-      (res) => {
-        const { data } = res;
-        dispatch(
-          slice.actions.logIn({
-            isLoggedIn: true,
-            token: data.accessToken,
-            user: data.user,
-          })
-        );
-        dispatch(
-          showSnackbar({ severity: "success", message: res.data.message })
-        );
+    AxiosService.auth("/api/user/login", formValues)
+      .then((res: any) => {
+        if (res.result) {
+          dispatch(
+            slice.actions.updateIsLoading({ isLoading: false, error: false })
+          );
+          dispatch(
+            slice.actions.logIn({
+              isLoggedIn: true,
+              token: res.result.token,
+              user: res.result,
+            })
+          );
+        }
+      })
+      .catch((error: any) => {
+        dispatch(showSnackbar({ severity: "error", message: error.message }));
         dispatch(
           slice.actions.updateIsLoading({ isLoading: false, error: false })
         );
-      },
-      (error: any) => {
-        console.log(error);
-        dispatch(showSnackbar({ severity: "error", message: error.message }));
-        dispatch(
-          slice.actions.updateIsLoading({ isLoading: false, error: true })
-        );
-      } // Display error alerts on request failure
-    );
+      });
   };
 }
 

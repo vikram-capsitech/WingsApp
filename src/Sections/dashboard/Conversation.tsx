@@ -90,9 +90,9 @@ const TextMsg = ({ el, menu }: any) => {
         spacing={0.8}
       >
         <Avatar
-          title={el.sender.username}
-          alt={el.sender.username}
-          src={el.sender.pic}
+          // title={el.sender.username}
+          alt={el.sender?.username}
+          src={el.sender?.pic}
           sx={{ width: 30, height: 30 }}
         />
         <Box

@@ -6,9 +6,11 @@ export interface ChatListItemInterface {
   isGroupChat: true;
   lastMessage?: ChatMessageInterface;
   name: string;
-  participants: UserInterface[];
+  users: UserInterface[];
   updatedAt: string;
   _id: string;
+  isTyping: boolean;
+  isActive: boolean;
 }
 
 export interface ChatMessageInterface {

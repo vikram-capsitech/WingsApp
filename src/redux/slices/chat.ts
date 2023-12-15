@@ -1,10 +1,7 @@
 import { Dispatch, createSlice } from "@reduxjs/toolkit";
-import { getUserChats } from "../../Api";
-import { requestHandler } from "../../Utils";
-import {
-  ChatListItemInterface,
-  ChatMessageInterface,
-} from "../../Interfaces/chat";
+import { ChatMessageInterface } from "../../Interfaces/chat";
+import AxiosService from "../../Api/Service";
+import { showSnackbar } from "./app";
 // import { showSnackbar } from "./app";
 
 // ----------------------------------------------------------------------
@@ -50,37 +47,46 @@ const slice = createSlice({
       state.isLoading = action.payload.isLoading;
       state.messages = action.payload.messages;
     },
+    updateTypingChat(state, action) {
+      state.isLoading = action.payload.isLoading;
+      state.chats = action.payload.chats;
+      state.currentChat = action.payload.currentChat;
+    },
   },
 });
 
 // Reducer
 export default slice.reducer;
 
-export function FetchChats() {
+export function FetchChats(token: any) {
   return async (dispatch: Dispatch) => {
     //Set Loader Visible
     dispatch(slice.actions.updateIsLoading({ isLoading: true, error: false }));
     // Make API call here
-    await requestHandler(
-      async () => await getUserChats(),
-      null,
-      (res) => {
-        const { data } = res;
+    await AxiosService.get(`/api/chat`, token)
+      .then((res: any) => {
+        if (res.result) {
+          dispatch(
+            slice.actions.fetchChats({
+              isLoading: false,
+              chats: res.result?.chats,
+              groups: res.result?.groups,
+              error: undefined,
+            })
+          );
+          dispatch(
+            slice.actions.updateIsLoading({ isLoading: false, error: false })
+          );
+        }
+      })
+      .catch((error: any) => {
         dispatch(
-          slice.actions.fetchChats({
-            isLoading: false,
-            chats: data.filter((i: ChatListItemInterface) => !i.isGroupChat),
-            groups: data.filter((i: ChatListItemInterface) => i.isGroupChat),
-            error: undefined,
-          })
+          showSnackbar({ severity: "error", message: error.message }) as any
         );
         dispatch(
           slice.actions.updateIsLoading({ isLoading: false, error: false })
         );
-      },
-      //On Error
-      alert
-    );
+      });
   };
 }
 
@@ -135,6 +141,21 @@ export function updateMessages(msg: ChatMessageInterface[]) {
       slice.actions.setMessages({
         isLoading: false,
         messages: msg,
+      })
+    );
+  };
+}
+
+export function updateTypeEvent(chat: any, currentChat: any) {
+  return async (dispatch: Dispatch) => {
+    //Set Loader visible
+    dispatch(slice.actions.updateIsLoading({ isLoading: true, error: false }));
+    //Update Chats content
+    dispatch(
+      slice.actions.updateTypingChat({
+        isLoading: false,
+        chats: chat,
+        currentChat: currentChat,
       })
     );
   };

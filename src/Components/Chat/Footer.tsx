@@ -120,7 +120,7 @@ const Footer = ({
   React.useEffect(() => {
     const getUserDetail = () => {
       if (currentChat) {
-        const rece = currentChat.participants.filter((u: any) => {
+        const rece = currentChat.users.filter((u: any) => {
           if (u._id !== user?._id) return u;
         });
         setName(rece[0].username);
@@ -153,8 +153,8 @@ const Footer = ({
         {isTyping && (
           <Stack
             style={{
-              marginLeft: "7%",
-              paddingRight: "5%",
+              marginLeft: "0%",
+              paddingRight: "0%",
             }}
           >
             <Player
@@ -163,10 +163,11 @@ const Footer = ({
               loop
               autoplay
               style={{
-                height: "80px",
-                width: "110px",
-                marginBottom: "-33px",
-                marginLeft: "-15px",
+                height: "auto",
+                width: "100px",
+                marginTop: "-48px",
+                marginBottom:'-50px',
+                marginLeft: "-10px",
               }}
             />
           </Stack>

@@ -6,12 +6,12 @@ import useResponsive from "../../Hooks/useResponsive";
 import BottomNav from "../../layouts/Dashboard/BottomNav";
 import ChatElement from "../../Components/ChatElement";
 import { useDispatch, useSelector } from "react-redux";
-import { requestHandler } from "../../Utils";
-import { createUserChat, getUserChats } from "../../Api";
 import { ChatListItemInterface } from "../../Interfaces/chat";
 import { FetchChats, SetChats, setCurrentChat } from "../../redux/slices/chat";
 import { SearchUserInput } from "../../Components/SearchAsync";
 import { useNavigate } from "react-router-dom";
+import AxiosService from "../../Api/Service";
+import { showSnackbar } from "../../redux/slices/app";
 
 const Chats = () => {
   const theme = useTheme();
@@ -19,29 +19,29 @@ const Chats = () => {
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
-
+  const { user } = useSelector((state: any) => state?.auth);
   const { chats } = useSelector((state: any) => state?.chat);
 
-  const getChats = async (userId: any) => {
-    requestHandler(
-      async () => await getUserChats(),
-      null,
-      (res) => {
-        const { data } = res;
-        const cht = data.filter((ch: ChatListItemInterface) => {
-          if (ch.participants.find((p: any) => p._id === userId)) {
-            return ch;
-          }
-        });
-        dispatch(setCurrentChat(cht[0]) as any);
-        dispatch(SetChats(data || []) as any);
-      },
-      alert
-    );
+  const accessChat = async (userId: any) => {
+    await AxiosService.post(`/api/chat`, { userId }, user.token)
+      .then((res: any) => {
+        if (res.result) {
+          if (!chats?.find((c: any) => c._id === res.result?._id))
+            dispatch(SetChats([res.result, ...chats] || []) as any);
+          dispatch(setCurrentChat(res.result) as any);
+          navigate(`/app/${res.result?._id}`);
+        }
+      })
+      .catch((error: any) => {
+        console.error(error.message);
+        dispatch(
+          showSnackbar({ severity: "error", message: error.message }) as any
+        );
+      });
   };
 
   React.useEffect(() => {
-    dispatch(FetchChats() as any);
+    dispatch(FetchChats(user.token) as any);
     // eslint-disable-next-line
   }, []);
 
@@ -86,25 +86,7 @@ const Chats = () => {
                 placeholder="Search people, groups, messages"
                 onChange={async (newValue: any) => {
                   //if user is creating normal chat just get a single user
-                  await requestHandler(
-                    // Callback to create a user chat
-                    async () => await createUserChat(newValue?.value),
-                    null, // Callback to handle loading state
-                    // Success callback
-                    (res) => {
-                      const { data } = res; // Extract data from response
-                      // If chat already exists with the selected user
-                      if (res.statusCode === 200) {
-                        // setSelectedChat(data);
-                        dispatch(setCurrentChat(data) as any);
-                        navigate(`/app/${data?._id}`);
-                        return;
-                      }
-                      getChats(newValue.value);
-                      // Execute the onSuccess function with received data
-                    },
-                    alert // Use the alert as the error handler
-                  );
+                  accessChat(newValue.value);
                 }}
                 style={{ width: 210 }}
               />

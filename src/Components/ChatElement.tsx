@@ -25,9 +25,9 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
     backgroundColor: "#44b700",
     color: "#44b700",
     boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-    zIndex:0,
-    top:18,
-    right:5,
+    zIndex: 0,
+    top: 18,
+    right: 5,
     "&::after": {
       position: "absolute",
       top: 0,
@@ -72,7 +72,7 @@ const ChatElement = (chat: ChatListItemInterface) => {
     <StyledChatBox
       onClick={() => {
         dispatch(setCurrentChat(chat) as any);
-        navigate(`/app/${chat?._id}`)
+        navigate(`/app/${chat?._id}`);
       }}
       sx={{
         width: "100%",
@@ -120,14 +120,26 @@ const ChatElement = (chat: ChatListItemInterface) => {
             >
               {truncateText(getChatObjectMetadata(chat, user!).title, 16)}
             </Typography>
-            {getChatObjectMetadata(chat, user!).lastMessage && (
-              <Typography variant="caption">
-                {truncateText(
-                  getChatObjectMetadata(chat, user!).lastMessage,
-                  20
-                )}
-              </Typography>
-            )}
+            {getChatObjectMetadata(chat, user!).lastMessage ||
+              (chat.isTyping && (
+                <>
+                  {chat.isTyping && (
+                    <label
+                      style={{ color: "green", fontWeight: 600, fontSize: 12 }}
+                    >
+                      ...Typing
+                    </label>
+                  )}
+                  {getChatObjectMetadata(chat, user!).lastMessage && (
+                    <Typography variant="caption">
+                      {truncateText(
+                        getChatObjectMetadata(chat, user!).lastMessage,
+                        20
+                      )}
+                    </Typography>
+                  )}
+                </>
+              ))}
           </Stack>
         </Stack>
         <Stack spacing={1} alignItems={"end"}>

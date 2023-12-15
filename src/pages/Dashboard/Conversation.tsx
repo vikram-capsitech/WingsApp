@@ -1,5 +1,5 @@
 import { Stack, Box } from "@mui/material";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import { SimpleBarStyle } from "../../Components/ScrollBar";
 
@@ -15,32 +15,15 @@ import {
 } from "../../Sections/dashboard/Conversation";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  SetChats,
-  setCurrentChat,
   updateMessages,
+  updateTypeEvent,
   updateUnreadMessages,
 } from "../../redux/slices/chat";
-import { requestHandler } from "../../Utils";
-import { getChatMessages, sendMessage } from "../../Api";
 import { useParams } from "react-router-dom";
-import { useSocket } from "../../Contexts/SocketContext";
-import {
-  ChatListItemInterface,
-  ChatMessageInterface,
-} from "../../Interfaces/chat";
-import wings from "../../Assets/Images/wings.svg";
 import addNotification from "react-push-notification";
-import _ from "lodash";
-
-const CONNECTED_EVENT = "connected";
-const DISCONNECT_EVENT = "disconnect";
-const JOIN_CHAT_EVENT = "joinChat";
-const NEW_CHAT_EVENT = "newChat";
-const TYPING_EVENT = "typing";
-const STOP_TYPING_EVENT = "stopTyping";
-const MESSAGE_RECEIVED_EVENT = "messageReceived";
-const LEAVE_CHAT_EVENT = "leaveChat";
-const UPDATE_GROUP_NAME_EVENT = "updateGroupName";
+import AxiosService from "../../Api/Service";
+import { showSnackbar } from "../../redux/slices/app";
+import { io } from "socket.io-client";
 
 const Conversation = ({ isMobile, menu }: any) => {
   const scrollRef = React.useRef<any>();
@@ -54,7 +37,7 @@ const Conversation = ({ isMobile, menu }: any) => {
   return (
     <Box p={isMobile ? 1 : 2}>
       <Stack spacing={2} style={{ height: "73.4dvh" }}>
-        {messages.toReversed().map((el: any) => {
+        {messages.map((el: any) => {
           switch (el.type) {
             case "divider":
               return (
@@ -107,309 +90,171 @@ const Conversation = ({ isMobile, menu }: any) => {
   );
 };
 
+let socket: any, selectedChatCompare: any;
 const ChatComponent = () => {
   const isMobile = useResponsive("between", "md", "xs", "sm");
   const theme = useTheme();
-
   const { clientId } = useParams();
   const dispatch = useDispatch();
-
-  const [message, setMessage] = React.useState(""); // To store the currently typed message
   const [attachedFiles, setAttachedFiles] = React.useState<File[]>([]); // To store files attached to messages
   const { currentChat, unreadMessages, messages, chats } = useSelector(
     (state: any) => state.chat
   );
-  const [isTyping, setIsTyping] = React.useState(false); // To track if someone is currently typing
-  const [selfTyping, setSelfTyping] = React.useState(false); // To track if the current user is typing
+  const { user } = useSelector((state: any) => state.auth);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isConnected, setIsConnected] = React.useState(false); // For tracking socket connection
   // To keep track of the setTimeout function
-  const typingTimeoutRef = useRef<any | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [newMessage, setNewMessage] = useState("");
+  const [attachments, setAttachments] = useState<any[]>([]);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [istyping, setIsTyping] = useState(false);
+  const [shouldRefresh, setShouldRefresh] = useState(false);
 
-  const { socket } = useSocket();
-
-  /**
-   *  A  function to update the last message of a specified chat to update the chat list
-   */
-  const updateChatLastMessage = (
-    chatToUpdateId: string,
-    message: ChatMessageInterface // The new message to be set as the last message
-  ) => {
-    // Search for the chat with the given ID in the chats array
-    const chatToUpdate = _.cloneDeep(chats.find(
-      (chat: { _id: string }) => chat._id === chatToUpdateId
-    )!);
-
-    // Update the 'lastMessage' field of the found chat with the new message
-    chatToUpdate.lastMessage = message;
-
-    // Update the 'updatedAt' field of the chat with the 'updatedAt' field from the message
-    chatToUpdate.updatedAt = message?.updatedAt;
-
-    // Update the state of chats, placing the updated chat at the beginning of the array
-    dispatch(
-      SetChats([
-        chatToUpdate, // Place the updated chat first
-        ...chats.filter((chat: { _id: string }) => chat._id !== chatToUpdateId), // Include all other chats except the updated one
-      ]) as any
-    );
-  };
-
-  //for get messages
-  const getMessages = async () => {
-    // Check if a chat is selected, if not, show an alert
-    if (!currentChat?._id) return alert("No chat is selected");
-    // Check if socket is available, if not, show an alert
-    if (!socket) return alert("Socket not available");
-    // Emit an event to join the current chat
-    socket.emit(JOIN_CHAT_EVENT, currentChat?._id);
-    // Filter out unread messages from the current chat as those will be read
-    dispatch(
-      updateUnreadMessages(
-        unreadMessages.filter((msg: any) => msg.chat !== currentChat?._id)
-      ) as any
-    );
-    // Make an async request to fetch chat messages for the current chat
-    requestHandler(
-      // Fetching messages for the current chat
-      async () => await getChatMessages(currentChat?._id || ""),
-      // Set the state to loading while fetching the messages
-      null,
-      // After fetching, set the chat messages to the state if available
-      (res) => {
-        const { data } = res;
-        dispatch(updateMessages(data || []) as any);
-      },
-      // Display any error alerts if they occur during the fetch
-      alert
-    );
-  };
-
-  // Function to send a chat message
-  const sendChatMessage = async () => {
-    // If no current chat ID exists or there's no socket connection, exit the function
-    if (!currentChat?._id || !socket) return;
-
-    // Emit a STOP_TYPING_EVENT to inform other users/participants that typing has stopped
-    socket.emit(STOP_TYPING_EVENT, currentChat?._id);
-
-    // Use the requestHandler to send the message and handle potential response or error
-    await requestHandler(
-      // Try to send the chat message with the given message and attached files
-      async () =>
-        await sendMessage(
-          currentChat?._id || "", // Chat ID or empty string if not available
-          message, // Actual text message
-          attachedFiles // Any attached files
-        ),
-      null,
-      // On successful message sending, clear the message input and attached files, then update the UI
-      (res) => {
-        setMessage(""); // Clear the message input
-        setAttachedFiles([]); // Clear the list of attached files
-        dispatch(updateMessages([res.data, ...messages]) as any); // Update messages in the UI
-        updateChatLastMessage(currentChat?._id || "", res.data); // Update the last message in the chat
-      },
-
-      // If there's an error during the message sending process, raise an alert
-      alert
-    );
-  };
-
-  const handleOnMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Update the message state with the current input value
-    setMessage(e.target.value);
-    // If socket doesn't exist or isn't connected, exit the function
-    if (!socket) return;
-
-    // Check if the user isn't already set as typing
-    if (!selfTyping) {
-      // Set the user as typing
-      setSelfTyping(true);
-
-      // Emit a typing event to the server for the current chat
-      socket.emit(TYPING_EVENT, currentChat?._id);
+  const fetchMessages = async () => {
+    if (!currentChat) return;
+    else {
+      setLoading(true);
+      await AxiosService.get(`/api/message/${currentChat._id}`, user.token)
+        .then((res: any) => {
+          if (res.result) {
+            setShouldRefresh(true);
+            dispatch(updateMessages(res.result) as any);
+            setLoading(false);
+            socket.emit("join chat", currentChat._id);
+          }
+        })
+        .catch((error: any) => {
+          dispatch(
+            showSnackbar({ severity: "error", message: error.message }) as any
+          );
+          setLoading(false);
+        });
     }
+  };
 
-    // Clear the previous timeout (if exists) to avoid multiple setTimeouts from running
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
+  const sendMessage = async () => {
+    socket.emit("stop typing", currentChat._id);
+    const content = {
+      content: newMessage,
+      chatId: currentChat,
+      attachment: attachments.map((file: any) => {
+        return file;
+      }),
+    };
+    await AxiosService.postMsg("/api/message", content, user.token)
+      .then((res: any) => {
+        if (res.result) {
+          socket.emit("new message", res.result);
+          dispatch(updateMessages([...messages, res.result]) as any);
+          socket.emit("join chat", currentChat._id);
+        }
+      })
+      .catch((error: any) => {
+        dispatch(
+          showSnackbar({ severity: "error", message: error.message }) as any
+        );
+      });
+  };
+
+  useEffect(() => {
+    console.log(import.meta.env.VITE_SOCKET_URI);
+    socket = io(import.meta.env.VITE_SOCKET_URI ?? "");
+    socket.emit("setup", user);
+    socket.on("connected", (userId: any) => {
+      setSocketConnected(true);
+    });
+
+    socket.on("typing", (user: any) => {
+      const updatedChat = chats.map((c: any) => {
+        if (c._id === user) {
+          return {
+            ...c,
+            isTyping: true,
+          };
+        } else {
+          return c;
+        }
+      });
+      const currentUpdate = { ...currentChat, isTyping: true };
+
+      dispatch(updateTypeEvent(updatedChat, currentUpdate) as any);
+      setIsTyping(true);
+    });
+
+    socket.on("stop typing", (user: any) => {
+      const updatedChat = chats.map((c: any) => {
+        if (c._id === user) {
+          return {
+            ...c,
+            isTyping: false,
+          };
+        } else {
+          return c;
+        }
+      });
+      const currentUpdate = { ...currentChat, isTyping: false };
+
+      dispatch(updateTypeEvent(updatedChat, currentUpdate) as any);
+      setIsTyping(false);
+    });
+
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    fetchMessages();
+    selectedChatCompare = currentChat;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentChat, clientId]);
+
+  useEffect(() => {
+    socket.on("message recieved", (newMessageRecieved: any) => {
+      //send notification of new chat message
+      addNotification({
+        title: "New Message from Wings",
+        message: `${newMessageRecieved.content}`,
+        duration: 4000,
+        icon: `${newMessageRecieved?.owner?.pic}`,
+        vibrate: 200,
+        backgroundTop: theme.palette.primary.main,
+        native: true, // when using native, your OS will handle theming.
+        onClick: () => {
+          window.focus();
+        },
+      });
+      if (
+        !selectedChatCompare || // if chat is not selected or doesn't match current chat
+        selectedChatCompare._id !== newMessageRecieved.chat._id
+      ) {
+        if (!unreadMessages.includes(newMessageRecieved)) {
+          dispatch(
+            updateUnreadMessages([newMessageRecieved, ...unreadMessages]) as any
+          );
+        }
+      }
+    });
+  });
+
+  const typingHandler = (e: any, value: any) => {
+    setNewMessage(value ?? e.target.value);
+    if (!socketConnected) return;
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", currentChat._id);
     }
-
-    // Define a length of time (in milliseconds) for the typing timeout
+    const lastTypingTime = new Date().getTime();
     const timerLength = 3000;
-
-    // Set a timeout to stop the typing indication after the timerLength has passed
-    typingTimeoutRef.current = setTimeout(() => {
-      // Emit a stop typing event to the server for the current chat
-      socket.emit(STOP_TYPING_EVENT, currentChat?._id);
-
-      // Reset the user's typing state
-      setSelfTyping(false);
+    setTimeout(() => {
+      const timeNow = new Date().getTime();
+      const timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit("stop typing", currentChat._id);
+        setTyping(false);
+      }
     }, timerLength);
   };
-
-  const onConnect = () => {
-    setIsConnected(true);
-  };
-
-  const onDisconnect = () => {
-    setIsConnected(false);
-  };
-
-  /**
-   * Handles the "typing" event on the socket.
-   */
-  const handleOnSocketTyping = (chatId: string) => {
-    // Check if the typing event is for the currently active chat.
-    if (chatId !== currentChat?._id) return;
-
-    // Set the typing state to true for the current chat.
-    setIsTyping(true);
-  };
-
-  /**
-   * Handles the "stop typing" event on the socket.
-   */
-  const handleOnSocketStopTyping = (chatId: string) => {
-    // Check if the stop typing event is for the currently active chat.
-    if (chatId !== currentChat?._id) return;
-
-    // Set the typing state to false for the current chat.
-    setIsTyping(false);
-  };
-
-  /**
-   * Handles the event when a new message is received.
-   */
-  const onMessageReceived = (message: ChatMessageInterface) => {
-    //send notification of new chat message
-    addNotification({
-      title: "New Message from Wings",
-      subtitle: `${message.sender?.username}`,
-      message: `${message.content}`,
-      duration: 4000,
-      icon: wings,
-      vibrate: 200,
-      backgroundTop: theme.palette.primary.main,
-      native: true, // when using native, your OS will handle theming.
-      onClick: () => {
-        window.focus();
-      },
-    });
-    // Check if the received message belongs to the currently active chat
-    if (message?.chat !== currentChat?._id) {
-      // If not, update the list of unread messages
-      dispatch(updateUnreadMessages([message, ...unreadMessages]) as any);
-      // setUnreadMessages((prev) => [message, ...prev]);
-    } else {
-      // If it belongs to the current chat, update the messages list for the active chat
-      // setMessages((prev) => [message, ...prev]);
-      dispatch(updateMessages([message, ...messages]) as any);
-    }
-
-    // Update the last message for the chat to which the received message belongs
-    updateChatLastMessage(message.chat || "", message);
-  };
-
-  const onNewChat = (chat: ChatListItemInterface) => {
-    dispatch(SetChats((prev: any) => [chat, ...prev]) as any);
-  };
-
-  // This function handles the event when a user leaves a chat.
-  const onChatLeave = (chat: ChatListItemInterface) => {
-    // Check if the chat the user is leaving is the current active chat.
-    if (chat._id === currentChat?._id) {
-      // If the user is in the group chat they're leaving, close the chat window.
-      // Remove the currentChat from local storage.
-      dispatch(setCurrentChat(null) as any);
-    }
-    // Update the chats by removing the chat that the user left.
-    dispatch(
-      SetChats((prev: any[]) => prev.filter((c) => c._id !== chat._id)) as any
-    );
-  };
-
-  // Function to handle changes in group name
-  const onGroupNameChange = (chat: ChatListItemInterface) => {
-    // Check if the chat being changed is the currently active chat
-    if (chat._id === currentChat?._id) {
-      // Update the current chat with the new details
-      // Save the updated chat details to local storage
-      dispatch(setCurrentChat(chat) as any);
-    }
-
-    // Update the list of chats with the new chat details
-    dispatch(
-      SetChats((prev: any[]) => [
-        // Map through the previous chats
-        ...prev.map((c: any) => {
-          // If the current chat in the map matches the chat being changed, return the updated chat
-          if (c._id === chat._id) {
-            return chat;
-          }
-          // Otherwise, return the chat as-is without any changes
-          return c;
-        }),
-      ]) as any
-    );
-  };
-
-  useEffect(() => {
-    if (currentChat) {
-      // If the socket connection exists, emit an event to join the specific chat using its ID.
-      socket?.emit(JOIN_CHAT_EVENT, currentChat?._id);
-      // Fetch the messages for the current chat.
-      getMessages();
-    }
-    // An empty dependency array ensures this useEffect runs only once, similar to componentDidMount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId]);
-
-  // This useEffect handles the setting up and tearing down of socket event listeners.
-  useEffect(() => {
-    // If the socket isn't initialized, we don't set up listeners.
-    if (!socket) return;
-
-    // Set up event listeners for various socket events:
-    // Listener for when the socket connects.
-    socket.on(CONNECTED_EVENT, onConnect);
-    // Listener for when the socket disconnects.
-    socket.on(DISCONNECT_EVENT, onDisconnect);
-    // Listener for when a user is typing.
-    socket.on(TYPING_EVENT, handleOnSocketTyping);
-    // Listener for when a user stops typing.
-    socket.on(STOP_TYPING_EVENT, handleOnSocketStopTyping);
-    // Listener for when a new message is received.
-    socket.on(MESSAGE_RECEIVED_EVENT, onMessageReceived);
-    // Listener for the initiation of a new chat.
-    socket.on(NEW_CHAT_EVENT, onNewChat);
-    // Listener for when a user leaves a chat.
-    socket.on(LEAVE_CHAT_EVENT, onChatLeave);
-    // Listener for when a group's name is updated.
-    socket.on(UPDATE_GROUP_NAME_EVENT, onGroupNameChange);
-
-    // When the component using this hook unmounts or if `socket` or `chats` change:
-    return () => {
-      // Remove all the event listeners we set up to avoid memory leaks and unintended behaviors.
-      socket.off(CONNECTED_EVENT, onConnect);
-      socket.off(DISCONNECT_EVENT, onDisconnect);
-      socket.off(TYPING_EVENT, handleOnSocketTyping);
-      socket.off(STOP_TYPING_EVENT, handleOnSocketStopTyping);
-      socket.off(MESSAGE_RECEIVED_EVENT, onMessageReceived);
-      socket.off(NEW_CHAT_EVENT, onNewChat);
-      socket.off(LEAVE_CHAT_EVENT, onChatLeave);
-      socket.off(UPDATE_GROUP_NAME_EVENT, onGroupNameChange);
-    };
-
-    // Note:
-    // The `chats` array is used in the `onMessageReceived` function.
-    // We need the latest state value of `chats`. If we don't pass `chats` in the dependency array,
-    // the `onMessageReceived` will consider the initial value of the `chats` array, which is empty.
-    // This will not cause infinite renders because the functions in the socket are getting mounted and not executed.
-    // So, even if some socket callbacks are updating the `chats` state, it's not
-    // updating on each `useEffect` call but on each socket call.
-  }, [socket, chats]);
 
   return (
     <Stack
@@ -444,14 +289,14 @@ const ChatComponent = () => {
         {/*  */}
         <ChatFooter
           value={""}
-          handleSendMsg={() => {
-            sendChatMessage();
+          handleSendMsg={sendMessage}
+          onChange={(e, value) => {
+            typingHandler(e, value);
           }}
-          onChange={handleOnMessageChange}
           handleFile={(file: any) => {
             setAttachedFiles([...attachedFiles, file]);
           }}
-          isTyping={isTyping}
+          isTyping={istyping}
         />
       </Stack>
     </Stack>
