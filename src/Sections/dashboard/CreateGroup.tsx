@@ -1,6 +1,6 @@
 import React from "react";
-import * as Yup from "yup";
 import {
+  Avatar,
   Button,
   Dialog,
   DialogContent,
@@ -10,68 +10,121 @@ import {
   TextField,
 } from "@mui/material";
 
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
-import FormProvider from "../../Components/Hook-Form/FormProvider";
-import RHFTextField from "../../Components/Hook-Form/RHFTextField";
-import RHFAutocomplete from "../../Components/Hook-Form/RHFAutocomplete";
-import { requestHandler } from "../../Utils";
-import { createGroupChat, getAvailableUsers } from "../../Api";
 import { SearchUserInput } from "../../Components/SearchAsync";
-import { Theme } from "emoji-picker-react";
-import { setCurrentChat } from "../../redux/slices/chat";
 import { dispatch } from "../../redux/store";
+import AxiosService from "../../Api/Service";
+import { useSelector } from "react-redux";
+import { showSnackbar } from "../../redux/slices/app";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...(props as any)} />;
 });
 
-const CreateGroupForm = ({ handleClose }: any) => {
-  const [data, setData] = React.useState<any>({
+const CreateGroupForm = ({ handleCancel }: any) => {
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const inputRef = React.useRef<any>(null);
+  const [values, setValues] = React.useState<{
+    pic: string | undefined;
+    name: string;
+    users: any[];
+  }>({
+    pic: undefined,
     name: "",
-    participants: [],
+    users: [],
   });
+  const { user } = useSelector((state: any) => state.auth);
 
   const onSubmit = async () => {
-    debugger;
-    try {
-      //  API Call
-      console.log("DATA", data);
-      // await requestHandler(
-      //   // Callback to create a user chat
-      //   async () => await createGroupChat(data),
-      //   null, // Callback to handle loading state
-      //   // Success callback
-      //   (res) => {
-      //     debugger;
-      //     const { data } = res; // Extract data from response
-      //     // If chat already exists with the selected user
-      //     if (res.statusCode === 200) {
-      //       // setSelectedChat(data);
-      //       dispatch(setCurrentChat(data) as any);
-      //       // navigate(`/app/${data?._id}`);
-      //       return;
-      //     }
-      //     // Execute the onSuccess function with received data
-      //   },
-      //   alert // Use the alert as the error handler
-      // );
-    } catch (error) {
-      console.error(error);
+    const val = {
+      ...values,
+      users: JSON.stringify(
+        values.users.map((user: any) => {
+          return user?.id;
+        })
+      ),
+    };
+    await AxiosService.post(`/api/chat/group`, val, user.token)
+      .then((res: any) => {
+        debugger;
+        if (res.result) {
+          setValues(res.result);
+          setLoading(false);
+          handleCancel(res.result);
+        }
+      })
+      .catch((error: any) => {
+        console.error(error.message);
+        setLoading(false);
+        dispatch(showSnackbar({ severity: "error", message: error.message }));
+      });
+  };
+
+  const postDetails = (pics: any) => {
+    if (pics === undefined) {
+      dispatch(
+        showSnackbar({ severity: "error", message: "Please Select an Image!" })
+      );
+      return;
+    }
+    if (pics.type === "image/jpeg" || pics.type === "image/png") {
+      const data = new FormData();
+      data.append("file", pics);
+      data.append("upload_preset", "yrwqilwz");
+      data.append("cloud_name", "resume00");
+      fetch("https://api.cloudinary.com/v1_1/resume00/image/upload", {
+        method: "post",
+        body: data,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setValues((r: any) => ({ ...r, pic: data?.url?.toString() }));
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      dispatch(
+        showSnackbar({ severity: "error", message: "Please Select an Image!" })
+      );
+      return;
     }
   };
 
   return (
     <Stack spacing={3}>
+      {values.pic && (
+        <div style={{ display: "flex" }}>
+          <Avatar src={`${values.pic}`} />
+        </div>
+      )}
+      <input
+        ref={inputRef}
+        style={{ display: "none" }}
+        hidden
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          if (e.currentTarget?.files && e.currentTarget.files?.length > 0) {
+            postDetails(e.currentTarget.files[0]);
+          }
+          e.currentTarget.value = "";
+        }}
+      />
+      <Button
+        variant="contained"
+        onClick={() => {
+          inputRef.current.click();
+        }}
+      >
+        Upload Image
+      </Button>
       <TextField
         name="name"
         label="Title"
-        value={data?.name}
+        value={values?.name}
         onChange={(e: any) => {
-          setData((data: any) => ({
-            ...data,
-            name: e.currentTarger?.value,
-          }));
+          const value = e.currentTarget.value;
+          setValues((u: any) => ({ ...u, name: value }));
         }}
       />
       <SearchUserInput
@@ -80,9 +133,9 @@ const CreateGroupForm = ({ handleClose }: any) => {
         isMulti={true}
         border={`1px solid lightgray`}
         onChange={async (newValue: any) => {
-          setData((data: any) => ({
-            ...data,
-            participants: newValue,
+          setValues((v: any) => ({
+            ...v,
+            users: JSON.stringify(newValue.map((u: any) => u.key)),
           }));
           //if user is creating normal chat just get a single user
         }}
@@ -94,7 +147,7 @@ const CreateGroupForm = ({ handleClose }: any) => {
         alignItems="center"
         justifyContent={"end"}
       >
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleCancel}>Cancel</Button>
         <Button variant="contained" onClick={onSubmit}>
           Create
         </Button>

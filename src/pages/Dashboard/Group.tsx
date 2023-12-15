@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Stack,
-  Typography,
-  IconButton,
-  Divider,
-} from "@mui/material";
+import { Box, Stack, Typography, IconButton, Divider } from "@mui/material";
 import { Plus } from "phosphor-react";
 import { useTheme } from "@mui/material/styles";
 import ChatElement from "../../Components/ChatElement";
@@ -15,15 +9,20 @@ import { FetchChats } from "../../redux/slices/chat";
 import { dispatch } from "../../redux/store";
 import useResponsive from "../../Hooks/useResponsive";
 import BottomNav from "../../layouts/Dashboard/BottomNav";
-import { useNavigate } from "react-router-dom";
 
 const Group = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const { groups } = useSelector((state: any) => state?.chat);
-  const navigate = useNavigate();
+  const { user } = useSelector((state: any) => state?.auth);
+
   const isDesktop = useResponsive("up", "md");
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = (value: any) => {
+    if (value) {
+      // setGroups((g: any) => [...groups, value]);
+      // setSelectedChat(value);
+      // navigate(`/Client/Capsitech/${value._id}`);
+    }
     setOpenDialog(false);
   };
   const handleOpenDialog = () => {
@@ -32,7 +31,7 @@ const Group = () => {
   const theme = useTheme();
 
   React.useEffect(() => {
-    dispatch(FetchChats() as any);
+    dispatch(FetchChats(user.token) as any);
     // eslint-disable-next-line
   }, []);
   return (
@@ -111,15 +110,15 @@ const Group = () => {
             </Stack>
             <Divider />
             <Stack sx={{ flexGrow: 1, height: "100%" }}>
-                <Stack spacing={0.5}>
-                  <Typography variant="subtitle2" sx={{ color: "#676667" }}>
-                    All Groups
-                  </Typography>
-                  {/* Chat List */}
-                  {groups.map((el: any) => {
-                    return <ChatElement {...el} />;
-                  })}
-                </Stack>
+              <Stack spacing={0.5}>
+                <Typography variant="subtitle2" sx={{ color: "#676667" }}>
+                  All Groups
+                </Typography>
+                {/* Chat List */}
+                {groups.map((el: any) => {
+                  return <ChatElement {...el} />;
+                })}
+              </Stack>
             </Stack>
           </Stack>
         </Box>
@@ -127,7 +126,7 @@ const Group = () => {
         {/* Right */}
       </Stack>
       {openDialog && (
-        <CreateGroup open={openDialog} handleClose={handleCloseDialog} />
+        <CreateGroup open={openDialog} handleCancel={handleCloseDialog} />
       )}
     </>
   );
