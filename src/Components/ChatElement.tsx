@@ -57,7 +57,7 @@ const ChatElement = (chat: ChatListItemInterface) => {
   const navigate = useNavigate();
   const { user } = useSelector((state: any) => state.auth as AuthInitialState);
   const { currentChat } = useSelector((state: any) => state.chat);
-
+  const path = window.location.pathname;
   const selectedChatId = currentChat?._id?.toString();
 
   let isSelected = selectedChatId === chat._id;
@@ -72,7 +72,11 @@ const ChatElement = (chat: ChatListItemInterface) => {
     <StyledChatBox
       onClick={() => {
         dispatch(setCurrentChat(chat) as any);
-        navigate(`/app/${chat?._id}`);
+        if (path.includes("group")) {
+          navigate(`/group/${chat?._id}`);
+        } else {
+          navigate(`/app/${chat?._id}`);
+        }
       }}
       sx={{
         width: "100%",

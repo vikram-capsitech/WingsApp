@@ -40,6 +40,7 @@ export default function Router() {
         //   element: <Chats />,
         // },
         { path: "app/:clientId", element: <GeneralApp /> },
+        { path: "group/:clientId", element: <GeneralApp /> },
         { path: "contact", element: <Contact /> },
         { path: "profile", element: <Profile /> },
 

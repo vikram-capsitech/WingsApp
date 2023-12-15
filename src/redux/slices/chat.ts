@@ -47,6 +47,10 @@ const slice = createSlice({
       state.isLoading = action.payload.isLoading;
       state.messages = action.payload.messages;
     },
+    setGroups(state, action) {
+      state.isLoading = action.payload.isLoading;
+      state.groups = action.payload.groups;
+    },
     updateTypingChat(state, action) {
       state.isLoading = action.payload.isLoading;
       state.chats = action.payload.chats;
@@ -99,6 +103,20 @@ export function SetChats(chat: any) {
       slice.actions.selectedChat({
         isLoading: false,
         chats: chat,
+      })
+    );
+  };
+}
+
+export function updateGroups(groups: any) {
+  return async (dispatch: Dispatch) => {
+    //Set Loader visible
+    dispatch(slice.actions.updateIsLoading({ isLoading: true, error: false }));
+    //Update groups content
+    dispatch(
+      slice.actions.setGroups({
+        isLoading: false,
+        groups: groups,
       })
     );
   };

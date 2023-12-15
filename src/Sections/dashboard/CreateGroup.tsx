@@ -20,8 +20,13 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...(props as any)} />;
 });
 
-const CreateGroupForm = ({ handleCancel }: any) => {
-  const [loading, setLoading] = React.useState<boolean>(false);
+const CreateGroup = ({
+  handleClose,
+  open,
+}: {
+  open: boolean;
+  handleClose: (value?: any) => void;
+}) => {
   const inputRef = React.useRef<any>(null);
   const [values, setValues] = React.useState<{
     pic: string | undefined;
@@ -35,26 +40,15 @@ const CreateGroupForm = ({ handleCancel }: any) => {
   const { user } = useSelector((state: any) => state.auth);
 
   const onSubmit = async () => {
-    const val = {
-      ...values,
-      users: JSON.stringify(
-        values.users.map((user: any) => {
-          return user?.id;
-        })
-      ),
-    };
-    await AxiosService.post(`/api/chat/group`, val, user.token)
+    await AxiosService.post(`/api/chat/group`, values, user.token)
       .then((res: any) => {
-        debugger;
         if (res.result) {
           setValues(res.result);
-          setLoading(false);
-          handleCancel(res.result);
+          if (handleClose) handleClose(res.result);
         }
       })
       .catch((error: any) => {
         console.error(error.message);
-        setLoading(false);
         dispatch(showSnackbar({ severity: "error", message: error.message }));
       });
   };
@@ -89,74 +83,6 @@ const CreateGroupForm = ({ handleCancel }: any) => {
       return;
     }
   };
-
-  return (
-    <Stack spacing={3}>
-      {values.pic && (
-        <div style={{ display: "flex" }}>
-          <Avatar src={`${values.pic}`} />
-        </div>
-      )}
-      <input
-        ref={inputRef}
-        style={{ display: "none" }}
-        hidden
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-          if (e.currentTarget?.files && e.currentTarget.files?.length > 0) {
-            postDetails(e.currentTarget.files[0]);
-          }
-          e.currentTarget.value = "";
-        }}
-      />
-      <Button
-        variant="contained"
-        onClick={() => {
-          inputRef.current.click();
-        }}
-      >
-        Upload Image
-      </Button>
-      <TextField
-        name="name"
-        label="Title"
-        value={values?.name}
-        onChange={(e: any) => {
-          const value = e.currentTarget.value;
-          setValues((u: any) => ({ ...u, name: value }));
-        }}
-      />
-      <SearchUserInput
-        name="participants"
-        placeholder="Members"
-        isMulti={true}
-        border={`1px solid lightgray`}
-        onChange={async (newValue: any) => {
-          setValues((v: any) => ({
-            ...v,
-            users: JSON.stringify(newValue.map((u: any) => u.key)),
-          }));
-          //if user is creating normal chat just get a single user
-        }}
-        style={{ width: 210 }}
-      />
-      <Stack
-        spacing={2}
-        direction={"row"}
-        alignItems="center"
-        justifyContent={"end"}
-      >
-        <Button onClick={handleCancel}>Cancel</Button>
-        <Button variant="contained" onClick={onSubmit}>
-          Create
-        </Button>
-      </Stack>
-    </Stack>
-  );
-};
-
-const CreateGroup = ({ open, handleClose }: any) => {
   return (
     <Dialog
       fullWidth
@@ -172,7 +98,86 @@ const CreateGroup = ({ open, handleClose }: any) => {
 
       <DialogContent sx={{ mt: 2 }}>
         {/* Create Group Form */}
-        <CreateGroupForm handleClose={handleClose} />
+        <Stack spacing={3}>
+          <Stack
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {/* {values.pic && ( */}
+            <Avatar
+              src={`${values.pic}`}
+              sx={{ width: 70, height: 70 }}
+              alt={values.name}
+            />
+            {/* )} */}
+          </Stack>
+          <input
+            ref={inputRef}
+            style={{ display: "none" }}
+            hidden
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              if (e.currentTarget?.files && e.currentTarget.files?.length > 0) {
+                postDetails(e.currentTarget.files[0]);
+              }
+              e.currentTarget.value = "";
+            }}
+          />
+          <Button
+            variant="contained"
+            onClick={() => {
+              inputRef.current.click();
+            }}
+          >
+            Upload Image
+          </Button>
+          <TextField
+            size="small"
+            name="name"
+            label="Title"
+            value={values?.name}
+            onChange={(e: any) => {
+              const value = e.currentTarget.value;
+              setValues((u: any) => ({ ...u, name: value }));
+            }}
+          />
+          <SearchUserInput
+            height={40}
+            name="participants"
+            placeholder="Members"
+            isMulti={true}
+            border={`1px solid lightgray`}
+            onChange={async (newValue: any) => {
+              setValues((v: any) => ({
+                ...v,
+                users: JSON.stringify(newValue.map((u: any) => u.value)),
+              }));
+              //if user is creating normal chat just get a single user
+            }}
+            style={{ width: 210 }}
+          />
+          <Stack
+            spacing={2}
+            direction={"row"}
+            alignItems="center"
+            justifyContent={"end"}
+          >
+            <Button
+              onClick={() => {
+                handleClose();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={onSubmit}>
+              Create
+            </Button>
+          </Stack>
+        </Stack>
       </DialogContent>
     </Dialog>
   );

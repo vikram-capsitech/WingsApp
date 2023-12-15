@@ -11,6 +11,7 @@ export const SearchUserInput = ({
   placeholder,
   isMulti = false,
   border = "none",
+  height = 35,
 }: any) => {
   const { user } = useSelector((state: any) => state.auth);
   const _loadSuggestions = (query: string, callback: any) => {
@@ -57,7 +58,7 @@ export const SearchUserInput = ({
             ...baseStyles,
             border: border,
             borderRadius: 8,
-            minHeight: 35,
+            minHeight: height,
             fontSize: 12,
           }),
           placeholder: (baseStyles) => ({

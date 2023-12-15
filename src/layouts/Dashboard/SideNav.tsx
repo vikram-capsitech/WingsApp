@@ -13,7 +13,6 @@ import ProfileMenu from "./ProfileMenu";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { UpdateTab } from "../../redux/slices/app";
-import { useSocket } from "../../Contexts/SocketContext";
 
 const getPath = (index: any) => {
   switch (index) {
@@ -41,7 +40,6 @@ const SideBar = () => {
   const { tab } = useSelector((state: any) => state.app);
 
   const navigate = useNavigate();
-  const { socket } = useSocket();
   const { onToggleMode } = useSettings();
 
   const selectedTab = tab;
@@ -120,27 +118,6 @@ const SideBar = () => {
                 </IconButton>
               );
             })}
-            {socket ? (
-              <div
-                title="Socket is Connected"
-                style={{
-                  height: 20,
-                  width: 20,
-                  borderRadius: "50%",
-                  backgroundColor: "green",
-                }}
-              ></div>
-            ) : (
-              <div
-                title="Socket is not Connected"
-                style={{
-                  height: 20,
-                  width: 20,
-                  borderRadius: "50%",
-                  backgroundColor: "red",
-                }}
-              ></div>
-            )}
           </Stack>
         </Stack>
         <Stack spacing={1} mb={1} style={{ alignItems: "center" }}>
