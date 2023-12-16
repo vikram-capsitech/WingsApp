@@ -8,6 +8,7 @@ import ThemeProvider from "./Theme";
 import { useDispatch, useSelector } from "react-redux";
 import React from "react";
 import { closeSnackBar } from "./redux/slices/app";
+import './App.css'
 // components
 
 const vertical = "bottom";

@@ -57,7 +57,6 @@ const ChatElement = (chat: ChatListItemInterface) => {
   const navigate = useNavigate();
   const { user } = useSelector((state: any) => state.auth as AuthInitialState);
   const { currentChat } = useSelector((state: any) => state.chat);
-  const path = window.location.pathname;
   const selectedChatId = currentChat?._id?.toString();
 
   let isSelected = selectedChatId === chat._id;
@@ -72,11 +71,7 @@ const ChatElement = (chat: ChatListItemInterface) => {
     <StyledChatBox
       onClick={() => {
         dispatch(setCurrentChat(chat) as any);
-        if (path.includes("group")) {
-          navigate(`/group/${chat?._id}`);
-        } else {
-          navigate(`/app/${chat?._id}`);
-        }
+        navigate(`/app/${chat?._id}`);
       }}
       sx={{
         width: "100%",
@@ -98,7 +93,7 @@ const ChatElement = (chat: ChatListItemInterface) => {
       >
         <Stack direction="row" spacing={1} alignItems={"center"}>
           {" "}
-          {chat._id === currentChat?._id ? (
+          {chat.isActive ? (
             <StyledBadge
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
@@ -124,26 +119,26 @@ const ChatElement = (chat: ChatListItemInterface) => {
             >
               {truncateText(getChatObjectMetadata(chat, user!).title, 16)}
             </Typography>
-            {getChatObjectMetadata(chat, user!).lastMessage ||
-              (chat.isTyping && (
-                <>
-                  {chat.isTyping && (
-                    <label
-                      style={{ color: "green", fontWeight: 600, fontSize: 12 }}
-                    >
-                      ...Typing
-                    </label>
-                  )}
-                  {getChatObjectMetadata(chat, user!).lastMessage && (
-                    <Typography variant="caption">
-                      {truncateText(
-                        getChatObjectMetadata(chat, user!).lastMessage,
-                        20
-                      )}
-                    </Typography>
-                  )}
-                </>
-              ))}
+            {(getChatObjectMetadata(chat, user!).lastMessage ||
+              chat.isTyping) && (
+              <>
+                {chat.isTyping && (
+                  <label
+                    style={{ color: "green", fontWeight: 600, fontSize: 12 }}
+                  >
+                    ...Typing
+                  </label>
+                )}
+                {getChatObjectMetadata(chat, user!).lastMessage && (
+                  <Typography variant="caption">
+                    {truncateText(
+                      getChatObjectMetadata(chat, user!).lastMessage,
+                      20
+                    )}
+                  </Typography>
+                )}
+              </>
+            )}
           </Stack>
         </Stack>
         <Stack spacing={1} alignItems={"end"}>

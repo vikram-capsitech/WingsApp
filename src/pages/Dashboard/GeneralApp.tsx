@@ -1,6 +1,6 @@
 import React from "react";
 import { useTheme } from "@mui/material/styles";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 
 import { useParams } from "react-router-dom";
 // import ChatComponent from "./Conversation";
@@ -16,6 +16,7 @@ const GeneralApp = () => {
   const { clientId } = useParams();
   const { sideBar } = useSelector((state: any) => state.app);
   const path = window.location.pathname;
+  const { user } = useSelector((state: any) => state.auth);
 
   return (
     <>
@@ -38,12 +39,11 @@ const GeneralApp = () => {
           ) : (
             <Stack
               spacing={2}
-              sx={{ height: "100%", width: "100%" }}
+              sx={{ height: "100dvh", width: "100%" }}
               alignItems="center"
               justifyContent={"center"}
             >
-              <NoChat />
-              <Typography variant="subtitle2">Select a conversation</Typography>
+              <NoChat name={user.name} />
             </Stack>
           )}
         </Box>

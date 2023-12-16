@@ -1,116 +1,242 @@
-import React, { useCallback, useState } from "react";
-import * as Yup from "yup";
-import { Formik, FormikHelpers, FormikValues } from "formik";
+import React from "react";
 // form
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import FormProvider from "../../../Components/Hook-Form/FormProvider";
-import { RHFTextField, RHFUploadAvatar } from "../../../Components/Hook-Form";
-import { Stack } from "@mui/material";
+import { Avatar, Button, Stack, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { useDispatch, useSelector } from "react-redux";
-import { AuthInitialState } from "../../../redux/slices/auth";
-import { requestHandler } from "../../../Utils";
+import { UpdateUser } from "../../../redux/slices/auth";
+import { showSnackbar } from "../../../redux/slices/app";
+import AxiosService from "../../../Api/Service";
 // import { UpdateUserProfile } from "../../../redux/slices/app";
 
 const ProfileForm = () => {
   const dispatch = useDispatch();
-  const [file, setFile] = useState();
-  const { user } = useSelector((state: any) => state.auth as AuthInitialState);
+  const { user } = useSelector((state: any) => state.auth);
+  const [receiver, setReceiver] = React.useState<any>();
+  const inputRef = React.useRef<any>(null);
+  const [edit, setEdit] = React.useState<boolean>(false);
 
-  const ProfileSchema = Yup.object().shape({
-    firstName: Yup.string().required("Name is required"),
-    about: Yup.string().required("About is required"),
-    avatar: Yup.string()
-      .required("Avatar is required")
-      .nullable(true as any),
-  });
+  React.useEffect(() => {
+    const getUserDetail = async () => {
+      await AxiosService.get(`/api/user/${user._id}`, user.token)
+        .then((res: any) => {
+          if (res.result) {
+            setReceiver(res.result);
+          }
+        })
+        .catch((error: any) => {
+          console.error(error.message);
+          dispatch(
+            showSnackbar({
+              severity: "error",
+              message: "Error in fetching the details",
+            }) as any
+          );
+        });
+    };
+    getUserDetail();
+  }, [user._id, user.token]);
 
-  const defaultValues = {
-    firstName: user?.username,
-    about: user?.about,
-    avatar: user?.pic,
-  };
-
-  const methods = useForm({
-    resolver: yupResolver(ProfileSchema),
-    defaultValues,
-  });
-
-  const {
-    reset,
-    watch,
-    control,
-    setValue,
-    handleSubmit,
-    formState: { isSubmitting, isSubmitSuccessful },
-  }: any = methods;
-
-  const values = watch();
-
-  const onSubmit = async (data: any) => {
-    try {
-      //   Send API request
-      console.log("DATA", data);
-      // dispatch(
-      //   UpdateUserProfile({
-      //     firstName: data?.firstName,
-      //     about: data?.about,
-      //     avatar: file,
-      //   })
-      // );
-    } catch (error) {
-      console.error(error);
+  const postDetails = (pics: any) => {
+    if (pics === undefined) {
+      dispatch(
+        showSnackbar({
+          severity: "error",
+          message: "Please Select an Image!",
+        }) as any
+      );
+      return;
+    }
+    console.log(pics);
+    if (pics.type === "image/jpeg" || pics.type === "image/png") {
+      const data = new FormData();
+      data.append("file", pics);
+      data.append("upload_preset", "yrwqilwz");
+      data.append("cloud_name", "resume00");
+      fetch("https://api.cloudinary.com/v1_1/resume00/image/upload", {
+        method: "post",
+        body: data,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setReceiver((r: any) => ({ ...r, pic: data?.url?.toString() }));
+          console.log(data.url.toString());
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      dispatch(
+        showSnackbar({
+          severity: "error",
+          message: "Please Select an Image!",
+        }) as any
+      );
+      return;
     }
   };
 
-  const handleDrop = useCallback(
-    (acceptedFiles: any) => {
-      const file = acceptedFiles[0];
-
-      setFile(file);
-
-      const newFile = Object.assign(file, {
-        preview: URL.createObjectURL(file),
+  const handleSubmit = async () => {
+    await AxiosService.post(
+      `/api/user/${user._id}/update`,
+      receiver,
+      user.token
+    )
+      .then((res: any) => {
+        if (res.result) {
+          // setReceiver(res.result);
+          const value = user;
+          value.name = res.result.name;
+          value.email = res.result.email;
+          value.pic = res.result.pic;
+          dispatch(UpdateUser(value) as any);
+          dispatch(
+            showSnackbar({
+              severity: "success",
+              message: "updates succesfully",
+            }) as any
+          );
+        }
+      })
+      .catch(() => {
+        dispatch(
+          showSnackbar({
+            severity: "error",
+            message: "Error in fetching the details",
+          }) as any
+        );
       });
-
-      if (file) {
-        setValue("avatar", newFile, { shouldValidate: true });
-      }
-    },
-    [setValue]
-  );
+  };
 
   return (
     <>
-      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-        <Stack spacing={4}>
-          <RHFUploadAvatar
-            name="avatar"
-            maxSize={3145728}
-            onDrop={handleDrop}
+      <Stack spacing={3}>
+        <Stack
+          spacing={1}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {/* {values.pic && ( */}
+          <Avatar
+            src={`${receiver?.pic}`}
+            sx={{ width: 100, height: 100 }}
+            alt={receiver?.name}
           />
-
-          <RHFTextField
-            helperText={"This name is visible to your contacts"}
-            name="firstName"
-            label="First Name"
+          {/* )} */}
+          <input
+            ref={inputRef}
+            style={{ display: "none" }}
+            hidden
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              if (e.currentTarget?.files && e.currentTarget.files?.length > 0) {
+                postDetails(e.currentTarget.files[0]);
+              }
+              e.currentTarget.value = "";
+            }}
           />
-          <RHFTextField multiline rows={4} name="about" label="About" />
-
-          <Stack direction={"row"} justifyContent="end">
-            <LoadingButton
-              color="primary"
-              size="large"
-              type="submit"
-              variant="contained"
-              // loading={isSubmitSuccessful || isSubmitting}
-            >
-              Save
-            </LoadingButton>
-          </Stack>
+          <Button
+            variant="contained"
+            disabled={!edit}
+            onClick={() => {
+              inputRef.current.click();
+            }}
+            sx={{ width: 150, height: 30 }}
+          >
+            Upload Image
+          </Button>
         </Stack>
-      </FormProvider>
+
+        <TextField
+          size="small"
+          disabled={!edit}
+          name="name"
+          value={receiver?.name}
+          onChange={(e) => {
+            const value = e.currentTarget.value;
+            setReceiver((r: any) => ({ ...r, name: value }));
+          }}
+        />
+        <TextField
+          size="small"
+          name="email"
+          disabled={!edit}
+          value={receiver?.email}
+          onChange={(e) => {
+            const value = e.currentTarget.value;
+            setReceiver((r: any) => ({ ...r, email: value }));
+          }}
+        />
+        {/* <TextField
+          size="small"
+          name="number"
+          value={receiver?.number}
+          onChange={(e) => {
+            const value = e.currentTarget.value;
+            setReceiver((r: any) => ({ ...r, number: value }));
+          }}
+        /> */}
+        <TextField
+          size="small"
+          name="about"
+          placeholder="About"
+          multiline
+          rows={4}
+          disabled={!edit}
+          value={receiver?.about}
+          onChange={(e) => {
+            const value = e.currentTarget.value;
+            setReceiver((r: any) => ({ ...r, about: value }));
+          }}
+        />
+        {edit ? (
+          <>
+            <Stack
+              direction={"row"}
+              justifyContent="end"
+              style={{ justifyContent: "space-between" }}
+            >
+              <Button
+                onClick={() => {
+                  setEdit(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <LoadingButton
+                color="primary"
+                size="small"
+                type="submit"
+                variant="contained"
+                onClick={() => {
+                  handleSubmit();
+                }}
+                // loading={isSubmitSuccessful || isSubmitting}
+              >
+                Save
+              </LoadingButton>
+            </Stack>
+          </>
+        ) : (
+          <>
+            <Stack direction={"row"} justifyContent="end">
+              <Button
+                color="inherit"
+                size="small"
+                variant="contained"
+                onClick={() => {
+                  setEdit(true);
+                }}
+              >
+                Edit
+              </Button>
+            </Stack>
+          </>
+        )}
+      </Stack>
     </>
   );
 };

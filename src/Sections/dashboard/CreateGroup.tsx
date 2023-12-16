@@ -32,10 +32,12 @@ const CreateGroup = ({
     pic: string | undefined;
     name: string;
     users: any[];
+    about: string;
   }>({
     pic: undefined,
     name: "",
     users: [],
+    about: "",
   });
   const { user } = useSelector((state: any) => state.auth);
 
@@ -44,6 +46,9 @@ const CreateGroup = ({
       .then((res: any) => {
         if (res.result) {
           setValues(res.result);
+          dispatch(
+            showSnackbar({ severity: "success", message: "Group Created" })
+          );
           if (handleClose) handleClose(res.result);
         }
       })
@@ -100,41 +105,44 @@ const CreateGroup = ({
         {/* Create Group Form */}
         <Stack spacing={3}>
           <Stack
+            spacing={1}
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            {/* {values.pic && ( */}
             <Avatar
               src={`${values.pic}`}
               sx={{ width: 70, height: 70 }}
               alt={values.name}
             />
-            {/* )} */}
+            <input
+              ref={inputRef}
+              style={{ display: "none" }}
+              hidden
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (
+                  e.currentTarget?.files &&
+                  e.currentTarget.files?.length > 0
+                ) {
+                  postDetails(e.currentTarget.files[0]);
+                }
+                e.currentTarget.value = "";
+              }}
+            />
+            <Button
+              variant="contained"
+              onClick={() => {
+                inputRef.current.click();
+              }}
+            >
+              Upload Image
+            </Button>
           </Stack>
-          <input
-            ref={inputRef}
-            style={{ display: "none" }}
-            hidden
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              if (e.currentTarget?.files && e.currentTarget.files?.length > 0) {
-                postDetails(e.currentTarget.files[0]);
-              }
-              e.currentTarget.value = "";
-            }}
-          />
-          <Button
-            variant="contained"
-            onClick={() => {
-              inputRef.current.click();
-            }}
-          >
-            Upload Image
-          </Button>
+
           <TextField
             size="small"
             name="name"
@@ -143,6 +151,16 @@ const CreateGroup = ({
             onChange={(e: any) => {
               const value = e.currentTarget.value;
               setValues((u: any) => ({ ...u, name: value }));
+            }}
+          />
+          <TextField
+            size="small"
+            name="name"
+            label="Description"
+            value={values?.about}
+            onChange={(e: any) => {
+              const value = e.currentTarget.value;
+              setValues((u: any) => ({ ...u, about: value }));
             }}
           />
           <SearchUserInput

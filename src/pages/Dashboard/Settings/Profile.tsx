@@ -12,26 +12,30 @@ const Profile = () => {
       <Stack direction="row" sx={{ width: "100%" }}>
         {/* Left Pane */}
         <Box
-          sx={{
-            overflowY: "scroll",
+          sx={
+            {
+              height: "100vh",
+              width: 320,
+              backgroundColor: (theme: any) =>
+                theme.palette.mode === "light"
+                  ? "#F8FAFF"
+                  : theme.palette.background,
 
-            height: "100vh",
-            width: 320,
-            backgroundColor: (theme:any) =>
-              theme.palette.mode === "light"
-                ? "#F8FAFF"
-                : theme.palette.background,
-
-            boxShadow: "0px 0px 2px rgba(0, 0, 0, 0.25)",
-          } as any}
+              boxShadow: "0px 0px 2px rgba(0, 0, 0, 0.25)",
+            } as any
+          }
         >
           <Stack p={4} spacing={5}>
             {/* Header */}
             <Stack direction="row" alignItems={"center"} spacing={3}>
               <IconButton>
-                <CaretLeft size={24} color={"#4B4B4B"} onClick={()=>{
-                  navigate(-1)
-                }}/>
+                <CaretLeft
+                  size={24}
+                  color={"#4B4B4B"}
+                  onClick={() => {
+                    navigate(-1);
+                  }}
+                />
               </IconButton>
 
               <Typography variant="h5">Profile</Typography>

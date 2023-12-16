@@ -15,6 +15,7 @@ import {
 } from "../../Sections/dashboard/Conversation";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  SetChats,
   updateMessages,
   updateTypeEvent,
   updateUnreadMessages,
@@ -163,6 +164,17 @@ const ChatComponent = () => {
     socket = io(import.meta.env.VITE_SOCKET_URI ?? "");
     socket.emit("setup", user);
     socket.on("connected", (userId: any) => {
+      const updatedChat = chats.map((c: any) => {
+        if (c._id === userId) {
+          return {
+            ...c,
+            isActive: true,
+          };
+        } else {
+          return c;
+        }
+      });
+      dispatch(SetChats(updatedChat) as any);
       setSocketConnected(true);
     });
 
@@ -235,7 +247,20 @@ const ChatComponent = () => {
         }
       }
     });
-  });
+    socket.on("disconnect", (userId: any) => {
+      const updatedChat = chats.map((c: any) => {
+        if (c._id === userId) {
+          return {
+            ...c,
+            isActive: false,
+          };
+        } else {
+          return c;
+        }
+      });
+      dispatch(SetChats(updatedChat) as any);
+    });
+  }, []);
 
   const typingHandler = (e: any, value: any) => {
     setNewMessage(value ?? e.target.value);

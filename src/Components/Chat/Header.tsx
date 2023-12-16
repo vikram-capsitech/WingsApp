@@ -17,6 +17,10 @@ import { CaretDown, MagnifyingGlass, Phone, VideoCamera } from "phosphor-react";
 import { useParams, useSearchParams } from "react-router-dom";
 import useResponsive from "../../Hooks/useResponsive";
 import { useSelector } from "react-redux";
+import AxiosService from "../../Api/Service";
+import { showSnackbar } from "../../redux/slices/app";
+import { dispatch } from "../../redux/store";
+import { getChatObjectMetadata } from "../../Utils";
 
 const StyledBadge = styled(Badge)(({ theme }: any) => ({
   "& .MuiBadge-badge": {
@@ -78,34 +82,48 @@ const ChatHeader = () => {
   const handleCloseConversationMenu = () => {
     setConversationMenuAnchorEl(null);
   };
-  const [receiver, setReceiver] = React.useState<{
-    id: any;
+  const [values, setValues] = React.useState<{
+    _id: any;
     name: string;
     email: string;
     pic: any;
-  }>({ id: "", email: "", name: "", pic: "" });
+    owner: any;
+    users: any[];
+  }>({ _id: "", email: "", name: "", pic: "", owner: {}, users: [] });
 
   React.useEffect(() => {
-    const getUserDetail = () => {
-      if (currentChat) {
-        const rece = currentChat.users.filter((u: any) => {
-          if (u._id !== user?._id) return u;
-        });
-        setReceiver(() => ({
-          email: rece[0].email,
-          id: rece[0]._id,
-          name: rece[0].username,
-          pic: rece[0].pic,
-        }));
+    const getUserDetail = async () => {
+      if (currentChat.users.length > 2) {
+        await AxiosService.get(`/api/chat/${clientId}`, user.token)
+          .then((res: any) => {
+            if (res.result) {
+              setValues(res.result);
+            }
+          })
+          .catch((error: any) => {
+            console.error(error.message);
+            dispatch(
+              showSnackbar({
+                severity: "error",
+                message: "Error in fetching the details",
+              })
+            );
+          });
+      } else {
+        setValues({
+          name: getChatObjectMetadata(currentChat, user!).title,
+          email: getChatObjectMetadata(currentChat, user!).description,
+          pic: getChatObjectMetadata(currentChat, user!).avatar,
+        } as any);
       }
     };
     getUserDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId]);
+  }, [clientId, user.token]);
 
   return (
     <Box
-      p={1}
+      p={1.2}
       width={"100%"}
       sx={
         {
@@ -120,7 +138,7 @@ const ChatHeader = () => {
       <Stack
         alignItems={"center"}
         direction={"row"}
-        sx={{ width: "100%", height: "80%" }}
+        sx={{ width: "100%", height: "100%" }}
         justifyContent="space-between"
       >
         <Stack
@@ -132,27 +150,44 @@ const ChatHeader = () => {
           direction="row"
         >
           <Box>
-            <StyledBadge
-              overlap="circular"
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              variant="dot"
-            >
-              <Avatar alt={receiver.name} src={receiver.pic} />
-            </StyledBadge>
+            {currentChat.isActive ? (
+              <>
+                <StyledBadge
+                  overlap="circular"
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                  }}
+                  variant="dot"
+                >
+                  <Avatar alt={values.name} src={values.pic} />
+                </StyledBadge>
+              </>
+            ) : (
+              <>
+                <Avatar alt={values.name} src={values.pic} />
+              </>
+            )}
           </Box>
           <Stack spacing={0.1}>
-            <Typography variant="subtitle2">{receiver.name}</Typography>
+            <Typography variant="subtitle2">{values.name}</Typography>
             {currentChat?.isTyping ? (
               <label style={{ color: "green", fontWeight: 600, fontSize: 12 }}>
                 ...Typing
               </label>
-            ) : (
-              <Typography variant="caption" style={{ fontWeight: 500 }}>
-                {receiver.email}
+            ) : currentChat.isActive ? (
+              <Typography
+                variant="caption"
+                style={{ fontWeight: 500, color: "green" }}
+              >
+                Online
               </Typography>
+            ) : (
+              <>
+                <Typography variant="caption" style={{ fontWeight: 500 }}>
+                  {values.email}
+                </Typography>
+              </>
             )}
           </Stack>
         </Stack>

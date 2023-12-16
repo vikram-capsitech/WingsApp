@@ -65,7 +65,7 @@ const TextMsg = ({ el, menu }: any) => {
       style={{
         display: "flex",
         justifyContent: "end",
-        alignItems: el.sender?._id !== user?._id ? "flex-start" : "flex-end",
+        alignItems: el.owner?._id !== user?._id ? "flex-start" : "flex-end",
       }}
       spacing={0.8}
     >
@@ -79,40 +79,40 @@ const TextMsg = ({ el, menu }: any) => {
       >
         {" "}
         <Stack style={{ marginRight: 10, fontSize: 10 }}>
-          {el.sender?._id === user?._id ? "You" : el.sender?.username}
+          {el.owner?._id === user?._id ? "You" : el.owner?.username}
         </Stack>
         <Stack style={{ fontSize: 9, color: "#9b9b9b" }}>
           {moment(el.createdAt).add("TIME_ZONE", "hours").fromNow(true)} ago
         </Stack>
       </Stack>
       <Stack
-        direction={el.sender?._id !== user?._id ? "row" : "row-reverse"}
+        direction={el.owner?._id !== user?._id ? "row" : "row-reverse"}
         spacing={0.8}
       >
         <Avatar
-          // title={el.sender.username}
-          alt={el.sender?.username}
-          src={el.sender?.pic}
+          title={el.owner.username}
+          alt={el.owner?.username}
+          src={el.owner?.pic}
           sx={{ width: 30, height: 30 }}
         />
         <Box
           sx={{
-            backgroundColor: el.sender?._id !== user?._id
+            backgroundColor: el.owner?._id !== user?._id
               ? alpha(theme.palette.background.default, 1)
               : theme.palette.primary.main,
             borderRadius: 1.1,
             width: "max-content",
             display: "flex",
             flexDirection: "row-reverse",
-            padding: el.sender?._id !== user?._id ? "3px 0px" : "3px 15px",
-            paddingRight: el.sender?._id !== user?._id ? 0 : 0,
-            paddingLeft:el.sender?._id !== user?._id ? 1 : 2
+            padding: el.owner?._id !== user?._id ? "3px 0px" : "3px 15px",
+            paddingRight: el.owner?._id !== user?._id ? 0 : 0,
+            paddingLeft:el.owner?._id !== user?._id ? 1 : 2
           }}
         >
           {menu && <MessageOption />}
           <Typography
             variant="body1"
-            color={`${el.sender?._id !== user?._id ? theme.palette.text : "#fff"}`}
+            color={`${el.owner?._id !== user?._id ? theme.palette.text : "#fff"}`}
           >
             {el.content}
           </Typography>

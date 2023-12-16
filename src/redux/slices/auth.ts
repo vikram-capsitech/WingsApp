@@ -41,6 +41,10 @@ const slice = createSlice({
       state.user = null;
       state.isLoading = false;
     },
+    updateUser(state, action) {
+      state.user = action.payload.user;
+      state.isLoading = false;
+    },
   },
 });
 
@@ -79,5 +83,17 @@ export function LogoutUser() {
   return async (dispatch: any) => {
     window.localStorage.removeItem("user");
     dispatch(slice.actions.signOut());
+  };
+}
+
+export function UpdateUser(user: any) {
+  return async (dispatch: any) => {
+    window.localStorage.removeItem("user");
+    dispatch(
+      slice.actions.updateUser({
+        isLoading: false,
+        user: user,
+      })
+    );
   };
 }

@@ -3,6 +3,7 @@ import {
   Fab,
   IconButton,
   InputAdornment,
+  Popover,
   Stack,
   TextField,
   Tooltip,
@@ -11,7 +12,6 @@ import {
   Camera,
   File,
   Image,
-  LinkSimple,
   PaperPlaneTilt,
   Smiley,
   Sticker,
@@ -19,7 +19,6 @@ import {
 } from "phosphor-react";
 import { useTheme, styled } from "@mui/material/styles";
 import React from "react";
-import { useSearchParams } from "react-router-dom";
 import useResponsive from "../../Hooks/useResponsive";
 
 import data from "@emoji-mart/data";
@@ -27,6 +26,7 @@ import Picker from "@emoji-mart/react";
 import { useSelector } from "react-redux";
 import { Player } from "@lottiefiles/react-lottie-player";
 import animationData from "../../Animations/Typing.json";
+import { useParams } from "react-router-dom";
 
 const StyledInput = styled(TextField)(() => ({
   "& .MuiInputBase-input": {
@@ -85,24 +85,27 @@ const Footer = ({
 }: ChatInputProps) => {
   const theme = useTheme();
   const isMobile = useResponsive("between", "md", "xs", "sm");
-  const [searchParams] = useSearchParams();
-  const [openPicker, setOpenPicker] = React.useState(false);
   const [openActions, setOpenActions] = React.useState(false);
   const [name, setName] = React.useState<string>("");
-  const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
   const [msg, setMsg] = React.useState("");
   const hiddenFileInput = React.useRef<any>(null);
   const [attachments, setAttachments] = React.useState<File>();
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
+    null
+  );
 
   const { currentChat } = useSelector((state: any) => state.chat);
   const { user } = useSelector((state: any) => state.auth);
+  const { clientId } = useParams();
+  const open = Boolean(anchorEl);
+  const id = open ? "simple-popover" : undefined;
 
   const handleEmojiClick = (e: any) => {
     let message = msg;
     message += e?.native;
     setMsg(message);
     onChange(e, message);
-    setShowEmojiPicker(!showEmojiPicker);
+    setAnchorEl(null);
   };
 
   const sendChat = (e: any) => {
@@ -128,7 +131,7 @@ const Footer = ({
     };
     getUserDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentChat, clientId]);
 
   return (
     <Box
@@ -166,7 +169,7 @@ const Footer = ({
                 height: "auto",
                 width: "100px",
                 marginTop: "-48px",
-                marginBottom:'-50px',
+                marginBottom: "-50px",
                 marginLeft: "-10px",
               }}
             />
@@ -174,29 +177,41 @@ const Footer = ({
         )}
         <Stack direction="row" alignItems={"center"} spacing={isMobile ? 1 : 3}>
           <Stack sx={{ width: "100%" }}>
-            <Box
-              style={{
-                zIndex: 10,
-                position: "fixed",
-                display: openPicker ? "inline" : "none",
-                bottom: 81,
-                right: isMobile
-                  ? 20
-                  : searchParams.get("open") === "true"
-                  ? 420
-                  : 100,
+            <Popover
+              id={id}
+              open={open}
+              anchorEl={anchorEl}
+              onClose={() => {
+                setAnchorEl(null);
+              }}
+              anchorPosition={{ top: 200, left: 400 }}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "center",
+              }}
+              transformOrigin={{
+                vertical: "bottom",
+                horizontal: "center",
               }}
             >
               <Picker
                 theme={theme.palette.mode}
                 data={data}
                 onEmojiSelect={handleEmojiClick}
+                autoFocusSearch={false}
               />
-            </Box>
+            </Popover>
+
             {/* Chat Input */}
             <StyledInput
               fullWidth
-              placeholder={`Message ${name}`}
+              placeholder={
+                currentChat?.users?.length > 2
+                  ? "Send message"
+                  : currentChat.isTyping
+                  ? `${name} is Typing`
+                  : `Message ${name}`
+              }
               variant="filled"
               value={msg}
               InputProps={{
@@ -229,14 +244,14 @@ const Footer = ({
                     </Stack>
 
                     <InputAdornment position="end">
-                      <IconButton
+                      {/* <IconButton
                         onClick={() => {
                           hiddenFileInput.current?.click();
                           // setOpenActions(!openActions);
                         }}
                       >
                         <LinkSimple />
-                      </IconButton>
+                      </IconButton> */}
                       <input
                         hidden
                         id="attachments"
@@ -258,14 +273,15 @@ const Footer = ({
                   </Stack>
                 ),
                 endAdornment: (
-                  <Stack sx={{ position: "relative" }}>
+                  <Stack sx={{ position: "relative" }} aria-describedby={id}>
                     <InputAdornment position="end">
                       <IconButton
-                        onClick={() => {
-                          setOpenPicker(!openPicker);
+                        onClick={(event) => {
+                          setAnchorEl(event.currentTarget);
+                          // setOpenPicker(!openPicker);
                         }}
                       >
-                        <Smiley />
+                        <Smiley aria-describedby={id} />
                       </IconButton>
                     </InputAdornment>
                   </Stack>
@@ -297,7 +313,12 @@ const Footer = ({
               justifyContent="center"
             >
               <IconButton>
-                <PaperPlaneTilt color="#ffffff" />
+                <PaperPlaneTilt
+                  color="#ffffff"
+                  onClick={(e) => {
+                    sendChat(e);
+                  }}
+                />
               </IconButton>
             </Stack>
           </Box>
