@@ -15,14 +15,45 @@ import { Message_options } from "../../Data";
 import Embed from "react-embed";
 import moment from "moment";
 import { useSelector } from "react-redux";
+import { showSnackbar } from "../../redux/slices/app";
+import { dispatch } from "../../redux/store";
+import AxiosService from "../../Api/Service";
+import { updateMessages } from "../../redux/slices/chat";
 
-const MessageOption = () => {
+const MessageOption = ({ messageId }: any) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const { user } = useSelector((state: any) => state.auth);
+  const { messages } = useSelector((state: any) => state.chat);
   const open = Boolean(anchorEl);
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = () => {
+  const handleClose = async (value?: string) => {
+    if (value === "Delete") {
+      await AxiosService.get(`/api/message/${messageId}/delete`, user.token)
+        .then((res: any) => {
+          if (res.result.status) {
+            const UpdatedMsgs = messages?.filter(
+              (m: any) => m._id !== messageId
+            );
+            dispatch(updateMessages(UpdatedMsgs));
+            dispatch(
+              showSnackbar({
+                severity: "success",
+                message: "Message delete succesfully",
+              }) as any
+            );
+          }
+        })
+        .catch(() => {
+          dispatch(
+            showSnackbar({
+              severity: "error",
+              message: "Something went wrong",
+            }) as any
+          );
+        });
+    }
     setAnchorEl(null);
   };
   return (
@@ -40,14 +71,21 @@ const MessageOption = () => {
         id="basic-menu"
         anchorEl={anchorEl}
         open={open}
-        onClose={handleClose}
+        onClose={() => {
+          handleClose();
+        }}
         MenuListProps={{
           "aria-labelledby": "basic-button",
         }}
       >
         <Stack spacing={0.5} px={0}>
-          {Message_options.map((el:any) => (
-            <MenuItem onClick={handleClose} style={{ fontSize: 12 }}>
+          {Message_options.map((el: any) => (
+            <MenuItem
+              onClick={() => {
+                handleClose(el?.key);
+              }}
+              style={{ fontSize: 12 }}
+            >
               {el.title}
             </MenuItem>
           ))}
@@ -65,7 +103,7 @@ const TextMsg = ({ el, menu }: any) => {
       style={{
         display: "flex",
         justifyContent: "end",
-        alignItems: el.owner?._id !== user?._id ? "flex-start" : "flex-end",
+        alignItems: el?.owner?._id !== user?._id ? "flex-start" : "flex-end",
       }}
       spacing={0.8}
     >
@@ -79,42 +117,45 @@ const TextMsg = ({ el, menu }: any) => {
       >
         {" "}
         <Stack style={{ marginRight: 10, fontSize: 10 }}>
-          {el.owner?._id === user?._id ? "You" : el.owner?.username}
+          {el?.owner?._id === user?._id ? "You" : el?.owner?.username}
         </Stack>
         <Stack style={{ fontSize: 9, color: "#9b9b9b" }}>
-          {moment(el.createdAt).add("TIME_ZONE", "hours").fromNow(true)} ago
+          {moment(el?.createdAt).add("TIME_ZONE", "hours").fromNow(true)} ago
         </Stack>
       </Stack>
       <Stack
-        direction={el.owner?._id !== user?._id ? "row" : "row-reverse"}
+        direction={el?.owner?._id !== user?._id ? "row" : "row-reverse"}
         spacing={0.8}
       >
         <Avatar
-          title={el.owner.username}
-          alt={el.owner?.username}
-          src={el.owner?.pic}
+          title={el?.owner?.username}
+          alt={el?.owner?.username}
+          src={el?.owner?.pic}
           sx={{ width: 30, height: 30 }}
         />
         <Box
           sx={{
-            backgroundColor: el.owner?._id !== user?._id
-              ? alpha(theme.palette.background.default, 1)
-              : theme.palette.primary.main,
+            backgroundColor:
+              el?.owner?._id !== user?._id
+                ? alpha(theme.palette.background.default, 1)
+                : theme.palette.primary.main,
             borderRadius: 1.1,
             width: "max-content",
             display: "flex",
             flexDirection: "row-reverse",
-            padding: el.owner?._id !== user?._id ? "3px 0px" : "3px 15px",
-            paddingRight: el.owner?._id !== user?._id ? 0 : 0,
-            paddingLeft:el.owner?._id !== user?._id ? 1 : 2
+            padding: el?.owner?._id !== user?._id ? "3px 0px" : "3px 15px",
+            paddingRight: el?.owner?._id !== user?._id ? 0 : 0,
+            paddingLeft: el?.owner?._id !== user?._id ? 1 : 2,
           }}
         >
-          {menu && <MessageOption />}
+          {menu && <MessageOption messageId={el?._id} />}
           <Typography
             variant="body1"
-            color={`${el.owner?._id !== user?._id ? theme.palette.text : "#fff"}`}
+            color={`${
+              el?.owner?._id !== user?._id ? theme.palette.text : "#fff"
+            }`}
           >
-            {el.content}
+            {el?.content}
           </Typography>
         </Box>
       </Stack>

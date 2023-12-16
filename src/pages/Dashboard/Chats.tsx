@@ -1,6 +1,5 @@
 import React from "react";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
-import { CircleDashed } from "phosphor-react";
+import { Box, Stack, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useResponsive from "../../Hooks/useResponsive";
 import BottomNav from "../../layouts/Dashboard/BottomNav";
@@ -74,15 +73,16 @@ const Chats = () => {
             direction="row"
           >
             <Typography variant="h5">Chats</Typography>
-            <Stack direction={"row"} alignItems="center" spacing={1}>
+            {/* <Stack direction={"row"} alignItems="center" spacing={1}>
               <IconButton sx={{ width: "max-content" }}>
                 <CircleDashed />
               </IconButton>
-            </Stack>
+            </Stack> */}
           </Stack>
           <Stack sx={{ width: "100%" }}>
             <Stack>
               <SearchUserInput
+                border={theme.shadows[10]}
                 placeholder="Search people, groups, messages"
                 onChange={async (newValue: any) => {
                   //if user is creating normal chat just get a single user

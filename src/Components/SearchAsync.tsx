@@ -4,6 +4,7 @@ import AxiosService from "../Api/Service";
 import { useSelector } from "react-redux";
 import { showSnackbar } from "../redux/slices/app";
 import { dispatch } from "../redux/store";
+import { useTheme } from "@mui/material";
 
 export const SearchUserInput = ({
   onChange,
@@ -14,6 +15,8 @@ export const SearchUserInput = ({
   height = 35,
 }: any) => {
   const { user } = useSelector((state: any) => state.auth);
+  const theme = useTheme();
+
   const _loadSuggestions = (query: string, callback: any) => {
     AxiosService.get(`/api/user?search=${query}`, user.token)
       .then((res: any) => {
@@ -59,11 +62,14 @@ export const SearchUserInput = ({
             border: border,
             borderRadius: 8,
             minHeight: height,
-            fontSize: 12,
+            fontSize: theme.typography.fontSize,
+            backgroundColor: `${theme.palette.background}FF`,
+            color: theme.palette.text.primary,
           }),
           placeholder: (baseStyles) => ({
             ...baseStyles,
-            fontSize: 13,
+            fontSize: theme.typography.fontSize + 1,
+            color: theme.palette.text.primary,
           }),
           dropdownIndicator: (baseStyles) => ({
             ...baseStyles,
@@ -72,16 +78,33 @@ export const SearchUserInput = ({
           menu: (baseStyles) => ({
             ...baseStyles,
             marginTop: 1,
-            fontSize: 12,
+            fontSize: theme.typography.fontSize,
+            backgroundColor: `${theme.palette.background.default}`,
+            zIndex: 1,
           }),
-          option: (base) => ({
+          option: (base, { isSelected }) => ({
             ...base,
             padding: "4px 10px",
-            fontSize: 12,
+            fontSize: theme.typography.fontSize,
+            color: theme.palette.text.primary,
+            backgroundColor: isSelected ? theme.palette.primary.dark : "",
+            ":hover": {
+              backgroundColor: `${theme.palette.primary.light}80`,
+            },
           }),
           loadingIndicator: (base) => ({
             ...base,
             display: "none",
+          }),
+          input: (base) => ({
+            ...base,
+            color: theme.palette.text.primary,
+            fontSize: theme.typography.fontSize,
+          }),
+          singleValue: (styles) => ({
+            ...styles,
+            color: theme.palette.text.primary,
+            fontSize: theme.typography.fontSize,
           }),
         }}
       />

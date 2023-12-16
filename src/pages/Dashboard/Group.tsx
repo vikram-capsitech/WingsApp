@@ -10,6 +10,7 @@ import useResponsive from "../../Hooks/useResponsive";
 import BottomNav from "../../layouts/Dashboard/BottomNav";
 import { useNavigate } from "react-router-dom";
 import GroupElement from "../../Components/GroupElement";
+import NoChat from "../../Assets/Illiustration/NoChat";
 
 const Group = () => {
   const [openDialog, setOpenDialog] = useState(false);
@@ -122,7 +123,7 @@ const Group = () => {
                     overflowX: "clip",
                     maxHeight: "80dvh",
                     overflowY: "scroll",
-                    scrollbarWidth:'none'
+                    scrollbarWidth: "none",
                   }}
                 >
                   {groups.map((el: any) => {
@@ -133,6 +134,14 @@ const Group = () => {
             </Stack>
           </Stack>
         </Box>
+        <Stack
+          spacing={2}
+          sx={{ height: "100dvh", width: "calc(100vw - 420px )" }}
+          alignItems="center"
+          justifyContent={"center"}
+        >
+          <NoChat name={user.name} />
+        </Stack>
         {openDialog && (
           <CreateGroup
             open={openDialog}

@@ -1,0 +1,32 @@
+{
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/"
+    },
+    {
+      "src": "/auth",
+      "dest": "/"
+    },
+    {
+      "src": "/auth/login",
+      "dest": "/"
+    },
+    {
+      "src": "/app",
+      "dest": "/"
+    },
+    {
+      "src": "/group",
+      "dest": "/"
+    },
+    {
+      "src": "/settings",
+      "dest": "/"
+    },
+    {
+      "src": "/profile",
+      "dest": "/"
+    }
+  ]
+}

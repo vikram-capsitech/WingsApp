@@ -5,10 +5,11 @@ import { Profile_Menu } from "../../Data";
 import { useDispatch, useSelector } from "react-redux";
 import { AuthInitialState, LogoutUser } from "../../redux/slices/auth";
 import { useNavigate } from "react-router-dom";
+import { Socket, io } from "socket.io-client";
 
 const ProfileMenu = () => {
   // const socket = useSocket();
-  const { user } = useSelector((state: any) => state.auth as AuthInitialState);
+  const { user } = useSelector((state: any) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -54,9 +55,9 @@ const ProfileMenu = () => {
           horizontal: "left",
         }}
       >
-        <Box p={1}>
-          <Stack spacing={1}>
-            {Profile_Menu.map((el:any, idx:any) => (
+        <Box p={0.5}>
+          <Stack spacing={0.1}>
+            {Profile_Menu.map((el: any, idx: any) => (
               <MenuItem onClick={handleClose}>
                 <Stack
                   onClick={() => {

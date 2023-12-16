@@ -39,7 +39,7 @@ const Conversation = ({ isMobile, menu }: any) => {
     <Box p={isMobile ? 1 : 2}>
       <Stack spacing={2} style={{ height: "73.4dvh" }}>
         {messages.map((el: any) => {
-          switch (el.type) {
+          switch (el?.type) {
             case "divider":
               return (
                 // Timeline
@@ -189,7 +189,10 @@ const ChatComponent = () => {
           return c;
         }
       });
-      const currentUpdate = { ...currentChat, isTyping: true };
+      const currentUpdate =
+        currentChat.is === user
+          ? { ...currentChat, isTyping: true }
+          : { ...currentChat };
 
       dispatch(updateTypeEvent(updatedChat, currentUpdate) as any);
       setIsTyping(true);
@@ -206,7 +209,11 @@ const ChatComponent = () => {
           return c;
         }
       });
-      const currentUpdate = { ...currentChat, isTyping: false };
+
+      const currentUpdate =
+        currentChat.is === user
+          ? { ...currentChat, isTyping: true }
+          : { ...currentChat };
 
       dispatch(updateTypeEvent(updatedChat, currentUpdate) as any);
       setIsTyping(false);
