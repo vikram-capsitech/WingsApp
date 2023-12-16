@@ -54,7 +54,7 @@ const slice = createSlice({
     updateTypingChat(state, action) {
       state.isLoading = action.payload.isLoading;
       state.chats = action.payload.chats;
-      state.currentChat = action.payload.currentChat;
+      // state.currentChat = action.payload.currentChat;
     },
   },
 });
@@ -164,7 +164,7 @@ export function updateMessages(msg: ChatMessageInterface[]) {
   };
 }
 
-export function updateTypeEvent(chat: any, currentChat: any) {
+export function updateTypeEvent(chat: any) {
   return async (dispatch: Dispatch) => {
     //Set Loader visible
     dispatch(slice.actions.updateIsLoading({ isLoading: true, error: false }));
@@ -173,7 +173,7 @@ export function updateTypeEvent(chat: any, currentChat: any) {
       slice.actions.updateTypingChat({
         isLoading: false,
         chats: chat,
-        currentChat: currentChat,
+        // currentChat: currentChat,
       })
     );
   };

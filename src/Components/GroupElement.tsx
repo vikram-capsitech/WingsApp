@@ -48,12 +48,14 @@ const GroupElement = (chat: any) => {
           ? "#fff"
           : theme.palette.background.paper,
       }}
-      p={0.7}
+      p={0.3}
+      m={0.5}
     >
       <Stack
         direction="row"
         alignItems={"center"}
         justifyContent="space-between"
+        padding={"0px 4px"}
       >
         <Stack direction="row" spacing={1} alignItems={"center"}>
           {" "}

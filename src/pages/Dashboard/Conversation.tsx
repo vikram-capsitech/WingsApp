@@ -164,17 +164,18 @@ const ChatComponent = () => {
     socket = io(import.meta.env.VITE_SOCKET_URI ?? "");
     socket.emit("setup", user);
     socket.on("connected", (userId: any) => {
-      const updatedChat = chats.map((c: any) => {
-        if (c._id === userId) {
-          return {
-            ...c,
-            isActive: true,
-          };
-        } else {
-          return c;
-        }
-      });
-      dispatch(SetChats(updatedChat) as any);
+      //TODO:Logic for update user status to online or offline
+      // const updatedChat = chats.map((c: any) => {
+      //   if (c._id === userId) {
+      //     return {
+      //       ...c,
+      //       isActive: true,
+      //     };
+      //   } else {
+      //     return c;
+      //   }
+      // });
+      // dispatch(SetChats(updatedChat) as any);
       setSocketConnected(true);
     });
 
@@ -189,12 +190,12 @@ const ChatComponent = () => {
           return c;
         }
       });
-      const currentUpdate =
-        currentChat.is === user
-          ? { ...currentChat, isTyping: true }
-          : { ...currentChat };
+      // const currentUpdate =
+      //   currentChat.is === user
+      //     ? { ...currentChat, isTyping: true }
+      //     : { ...currentChat };
 
-      dispatch(updateTypeEvent(updatedChat, currentUpdate) as any);
+      dispatch(updateTypeEvent(updatedChat) as any);
       setIsTyping(true);
     });
 
@@ -210,12 +211,12 @@ const ChatComponent = () => {
         }
       });
 
-      const currentUpdate =
-        currentChat.is === user
-          ? { ...currentChat, isTyping: true }
-          : { ...currentChat };
+      // const currentUpdate =
+      //   currentChat.is === user
+      //     ? { ...currentChat, isTyping: true }
+      //     : { ...currentChat };
 
-      dispatch(updateTypeEvent(updatedChat, currentUpdate) as any);
+      dispatch(updateTypeEvent(updatedChat) as any);
       setIsTyping(false);
     });
 
